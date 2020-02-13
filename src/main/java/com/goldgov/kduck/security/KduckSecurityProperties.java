@@ -8,25 +8,26 @@ import java.util.Set;
 public class KduckSecurityProperties {
 
     private String tokenStore;
-    private String authServer;
+    private String jwtKey = "KDUCK-JWT-SIGNING-KEY";
 
-    private Provider provider;
-    private Registration registration;
+    private AuthServer authServer;
+    private ResServer resServer;
+    private Client client;
 
-    public Provider getProvider() {
-        return provider;
+    public String getJwtKey() {
+        return jwtKey;
     }
 
-    public void setProvider(Provider provider) {
-        this.provider = provider;
+    public void setJwtKey(String jwtKey) {
+        this.jwtKey = jwtKey;
     }
 
-    public Registration getRegistration() {
-        return registration;
+    public Client getClient() {
+        return client;
     }
 
-    public void setRegistration(Registration registration) {
-        this.registration = registration;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public String getTokenStore() {
@@ -37,12 +38,20 @@ public class KduckSecurityProperties {
         this.tokenStore = tokenStore;
     }
 
-    public String getAuthServer() {
+    public AuthServer getAuthServer() {
         return authServer;
     }
 
-    public void setAuthServer(String authServer) {
+    public void setAuthServer(AuthServer authServer) {
         this.authServer = authServer;
+    }
+
+    public ResServer getResServer() {
+        return resServer;
+    }
+
+    public void setResServer(ResServer resServer) {
+        this.resServer = resServer;
     }
 
     public static class Provider {
@@ -76,7 +85,6 @@ public class KduckSecurityProperties {
         private Set<String> scope;
         private String clientName;
         private String authorizationGrantType;
-        private String[] resourcePaths;
 
         public String getClientId() {
             return clientId;
@@ -126,12 +134,71 @@ public class KduckSecurityProperties {
             this.authorizationGrantType = authorizationGrantType;
         }
 
-        public String[] getResourcePaths() {
-            return resourcePaths;
+    }
+
+
+    /**
+     * 客户端配置
+     */
+    public static class Client{
+
+        private Provider provider;
+        private Registration registration;
+
+        public Provider getProvider() {
+            return provider;
         }
 
-        public void setResourcePaths(String[] resourcePaths) {
-            this.resourcePaths = resourcePaths;
+        public void setProvider(Provider provider) {
+            this.provider = provider;
+        }
+
+        public Registration getRegistration() {
+            return registration;
+        }
+
+        public void setRegistration(Registration registration) {
+            this.registration = registration;
+        }
+    }
+
+    /**
+     * 资源服务器配置
+     */
+    public static class ResServer{
+        private String[] paths;
+
+        private boolean enabled;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String[] getPaths() {
+            return paths;
+        }
+
+        public void setPaths(String[] paths) {
+            this.paths = paths;
+        }
+    }
+
+    /**
+     * 认证服务器配置
+     */
+    public static class AuthServer{
+        private boolean enabled;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
     }
 

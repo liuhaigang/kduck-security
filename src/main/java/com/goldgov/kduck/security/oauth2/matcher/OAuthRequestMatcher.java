@@ -19,8 +19,11 @@ public class OAuthRequestMatcher implements RequestMatcher {
     public boolean matches(HttpServletRequest request) {
         String requestPath = getRequestPath(request);
         for (String path : paths) {
-            if(path.startsWith("/oauth")) continue;
-            if (antPathMatcher.match(path,requestPath)) {
+            if(path.startsWith("!") && antPathMatcher.match(path.substring(1),requestPath)) {
+                return false;
+            }
+
+            if (path.equals("any") || antPathMatcher.match(path,requestPath)) {
                 return true;
             }
         }

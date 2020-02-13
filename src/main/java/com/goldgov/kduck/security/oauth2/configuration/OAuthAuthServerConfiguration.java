@@ -22,8 +22,8 @@ import java.util.List;
 @Configuration
 @EnableAuthorizationServer
 @ConditionalOnClass(EnableAuthorizationServer.class)
-@ConditionalOnProperty(prefix="kduck.security.oauth2",name="authServer",havingValue = "enabled")
-public class OauthAuthServerConfiguration extends AuthorizationServerConfigurerAdapter {
+@ConditionalOnProperty(prefix="kduck.security.oauth2.authServer",name="enabled",havingValue = "true")
+public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
     private final AuthenticationManager authenticationManager;
 
@@ -40,7 +40,7 @@ public class OauthAuthServerConfiguration extends AuthorizationServerConfigurerA
     private TokenEnhancer tokenEnhancer;
 
     @Autowired
-    public OauthAuthServerConfiguration(AuthenticationManager authenticationManager){
+    public OAuthAuthServerConfiguration(AuthenticationManager authenticationManager){
         this.authenticationManager = authenticationManager;
     }
 
