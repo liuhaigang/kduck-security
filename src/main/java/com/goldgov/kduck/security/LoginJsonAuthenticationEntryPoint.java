@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -35,7 +36,6 @@ public class LoginJsonAuthenticationEntryPoint implements AuthenticationEntryPoi
         }else{
             redirectStrategy.sendRedirect(request, response, loginPage);
         }
-
 
     }
 

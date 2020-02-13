@@ -1,10 +1,15 @@
 package com.goldgov.kduck.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +19,7 @@ import java.io.IOException;
 /**
  * LiuHG
  */
-public class LoginSuccessHandler implements AuthenticationSuccessHandler {
+public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -28,8 +33,14 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         if(callback != null){
             callback.doHandler(principal);
         }
-        JsonObject jsonObject = new JsonObject(principal.getUsername());
-        response.setContentType("application/json");
-        om.writeValue(response.getOutputStream(),jsonObject);
+
+        if(RequestUtils.isAjax(request)){
+            JsonObject jsonObject = new JsonObject(principal.getUsername());
+            response.setContentType("application/json");
+            om.writeValue(response.getOutputStream(),jsonObject);
+        }else{
+            super.onAuthenticationSuccess(request,response,authentication);
+        }
     }
+
 }

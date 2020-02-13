@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AccountExpiredException;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +21,7 @@ import java.io.IOException;
 /**
  * LiuHG
  */
-public class LoginFailHandler implements AuthenticationFailureHandler {
+public class LoginFailHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -45,9 +47,14 @@ public class LoginFailHandler implements AuthenticationFailureHandler {
             callback.doHandler(exception);
         }
 
-        JsonObject jsonObject = new JsonObject(null,-1,failMessage);
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        om.writeValue(response.getOutputStream(),jsonObject);
+        if(RequestUtils.isAjax(request)){
+            JsonObject jsonObject = new JsonObject(null,-1,failMessage);
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            om.writeValue(response.getOutputStream(),jsonObject);
+        }else{
+            super.onAuthenticationFailure(request,response,exception);
+        }
     }
+
 }

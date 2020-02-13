@@ -25,12 +25,6 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter{
 
     @Override
     public boolean supports(ConfigAttribute attribute) {
-//        if (attribute.toString().equals("authenticated")){
-//            return true;
-//        }else{
-//            return false;
-//        }
-
         return true;
     }
 
@@ -102,7 +96,8 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter{
 
     private boolean permitAll(Collection<ConfigAttribute> attributes) {
         for (ConfigAttribute attribute : attributes) {
-            if(attribute.toString().equals("permitAll")){
+            String attribute1 = attribute.getAttribute();
+            if(attribute1 != null && attribute1.equals("permitAll")){
                 return true;
             }
         }

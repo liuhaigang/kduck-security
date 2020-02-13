@@ -24,7 +24,11 @@ public class SecurityController {
     public JsonObject currentUserName(Authentication principal) {
         if(principal == null) return new JsonObject("_ANONYMOUS_");
         if(userExtInfo != null){
-            ValueMap userExtInfo = this.userExtInfo.getUserExtInfo((AuthUser) principal.getPrincipal());
+            AuthUser user = (AuthUser) principal.getPrincipal();
+            ValueMap userExtInfo = this.userExtInfo.getUserExtInfo(user);
+            if(userExtInfo == null){
+                throw new RuntimeException("获取用户的扩展信息不能为null" + user.getUserId());
+            }
             return new JsonObject(userExtInfo);
         }
         return new JsonObject(ParamMap.create("userName",principal.getName()).toMap());
