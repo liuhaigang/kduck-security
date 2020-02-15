@@ -1,8 +1,6 @@
-package com.goldgov.kduck.security;
+package com.goldgov.kduck.security.access;
 
-import com.goldgov.kduck.service.ValueMap;
-import com.goldgov.kduck.service.ValueMapList;
-import com.goldgov.kduck.utils.PathUtils;
+import com.goldgov.kduck.security.RoleAccessVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
@@ -18,7 +16,7 @@ import java.util.List;
 /**
  * LiuHG
  */
-public abstract class AbstractRoleAccessVoter implements RoleAccessVoter{
+public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
     private AuthenticationTrustResolver authenticationTrustResolver = new AuthenticationTrustResolverImpl();
 
     private AntPathMatcher pathMatcher =  new AntPathMatcher();
@@ -55,13 +53,9 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter{
                 i++;
             }
 
-            ValueMapList valueMaps = listResourceOperate(roleCodes);
-            for (ValueMap operate : valueMaps) {
-                String resourcePath = operate.getValueAsString("resourcePath");
-                String operatePath = operate.getValueAsString("operatePath");
-                String operateMethod = operate.getValueAsString("method");
-                String fullPath = PathUtils.appendPath(resourcePath, operatePath);
-                if(pathMatcher.match(fullPath,requestUri) && method.equals(operateMethod)){
+            List<ProtectedResource> resourceList = listResourceOperateByCode(roleCodes);
+            for (ProtectedResource resource : resourceList) {
+                if(pathMatcher.match(resource.getFullPath(),requestUri) && method.equals(resource.getOperateMethod())){
                     result= ACCESS_GRANTED;
                     break;
                 }
@@ -82,11 +76,11 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter{
      * @return
      */
     private boolean permitAll(String requestUri,String method) {
-        List<String> uriList = listAllResourceUri();
-        for (String fullUri : uriList) {
-            if(fullUri.startsWith(method)){
-                String uri = fullUri.substring(method.length() + 1);
-                if(pathMatcher.match(uri,requestUri)){
+        //TODO 查询后加入到缓存，内存缓存即可。定时、手动刷新。
+        List<ProtectedResource> allList = listAllResourceOperate();
+        for (ProtectedResource res : allList) {
+            if(res.getOperateMethod().equals(method)){
+                if(pathMatcher.match(res.getFullPath(),requestUri)){
                     return false;
                 }
             }
@@ -109,7 +103,7 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter{
         return true;
     }
 
-    public abstract ValueMapList listResourceOperate(String[] roleCodes);
+    public abstract List<ProtectedResource> listResourceOperateByCode(String[] roleCodes);
 
-    public abstract List<String> listAllResourceUri();
+    public abstract List<ProtectedResource> listAllResourceOperate();
 }

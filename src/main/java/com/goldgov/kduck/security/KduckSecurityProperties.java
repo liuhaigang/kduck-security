@@ -4,54 +4,136 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Set;
 
-@ConfigurationProperties(prefix = "kduck.security.oauth2")
+@ConfigurationProperties(prefix = "kduck.security")
 public class KduckSecurityProperties {
 
-    private String tokenStore;
-    private String jwtKey = "KDUCK-JWT-SIGNING-KEY";
+    private String loginPage;
 
-    private AuthServer authServer;
-    private ResServer resServer;
-    private Client client;
+    private boolean httpBasic = true;
 
-    public String getJwtKey() {
-        return jwtKey;
+    private String defaultSuccessUrl;
+    private String defaultFailureUrl;
+
+    private String successUrlParameter;
+    private boolean alwaysUse;
+    private boolean forwardToFailureUrl;
+
+    private OAuth2Config oauth2;
+
+    public String getSuccessUrlParameter() {
+        return successUrlParameter;
     }
 
-    public void setJwtKey(String jwtKey) {
-        this.jwtKey = jwtKey;
+    public void setSuccessUrlParameter(String successUrlParameter) {
+        this.successUrlParameter = successUrlParameter;
     }
 
-    public Client getClient() {
-        return client;
+    public boolean isForwardToFailureUrl() {
+        return forwardToFailureUrl;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setForwardToFailureUrl(boolean forwardToFailureUrl) {
+        this.forwardToFailureUrl = forwardToFailureUrl;
     }
 
-    public String getTokenStore() {
-        return tokenStore;
+    public String getDefaultFailureUrl() {
+        return defaultFailureUrl;
     }
 
-    public void setTokenStore(String tokenStore) {
-        this.tokenStore = tokenStore;
+    public void setDefaultFailureUrl(String defaultFailureUrl) {
+        this.defaultFailureUrl = defaultFailureUrl;
     }
 
-    public AuthServer getAuthServer() {
-        return authServer;
+    public String getDefaultSuccessUrl() {
+        return defaultSuccessUrl;
     }
 
-    public void setAuthServer(AuthServer authServer) {
-        this.authServer = authServer;
+    public void setDefaultSuccessUrl(String defaultSuccessUrl) {
+        this.defaultSuccessUrl = defaultSuccessUrl;
     }
 
-    public ResServer getResServer() {
-        return resServer;
+    public boolean isAlwaysUse() {
+        return alwaysUse;
     }
 
-    public void setResServer(ResServer resServer) {
-        this.resServer = resServer;
+    public void setAlwaysUse(boolean alwaysUse) {
+        this.alwaysUse = alwaysUse;
+    }
+
+    public boolean isHttpBasic() {
+        return httpBasic;
+    }
+
+    public void setHttpBasic(boolean httpBasic) {
+        this.httpBasic = httpBasic;
+    }
+
+    public String getLoginPage() {
+        return loginPage;
+    }
+
+    public void setLoginPage(String loginPage) {
+        this.loginPage = loginPage;
+    }
+
+    public OAuth2Config getOauth2() {
+        return oauth2;
+    }
+
+    public void setOauth2(OAuth2Config oauth2) {
+        this.oauth2 = oauth2;
+    }
+
+    public static class OAuth2Config {
+
+        public static final String DEFAULT_JWT_KEY = "KDUCK-JWT-SIGNING-KEY";
+
+        private String tokenStore;
+        private String jwtKey = DEFAULT_JWT_KEY;
+
+        private AuthServer authServer;
+        private ResServer resServer;
+        private Client client;
+
+        public String getJwtKey() {
+            return jwtKey;
+        }
+
+        public void setJwtKey(String jwtKey) {
+            this.jwtKey = jwtKey;
+        }
+
+        public Client getClient() {
+            return client;
+        }
+
+        public void setClient(Client client) {
+            this.client = client;
+        }
+
+        public String getTokenStore() {
+            return tokenStore;
+        }
+
+        public void setTokenStore(String tokenStore) {
+            this.tokenStore = tokenStore;
+        }
+
+        public AuthServer getAuthServer() {
+            return authServer;
+        }
+
+        public void setAuthServer(AuthServer authServer) {
+            this.authServer = authServer;
+        }
+
+        public ResServer getResServer() {
+            return resServer;
+        }
+
+        public void setResServer(ResServer resServer) {
+            this.resServer = resServer;
+        }
     }
 
     public static class Provider {

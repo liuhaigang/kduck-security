@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security.oauth2.configuration;
 
 import com.goldgov.kduck.security.KduckSecurityProperties;
+import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -29,8 +30,12 @@ public class TokenConfiguration {
     @Bean
     @ConditionalOnProperty(prefix="kduck.security.oauth2",name="tokenStore",havingValue = "jwt",matchIfMissing=true)
     public JwtAccessTokenConverter accessTokenConverter() {
+        String jwtKey = OAuth2Config.DEFAULT_JWT_KEY;
+        if(securityProperties.getOauth2() != null && securityProperties.getOauth2().getJwtKey() != null){
+            jwtKey = securityProperties.getOauth2().getJwtKey();
+        }
         final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey(securityProperties.getJwtKey());
+        converter.setSigningKey(jwtKey);
 //        converter.setKeyPair(keyPair());
         return converter;
     }

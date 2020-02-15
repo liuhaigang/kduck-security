@@ -73,7 +73,7 @@ public class OAuthResourceServerConfiguration extends ResourceServerConfigurerAd
         voterList.add(roleAccessVoter);
 
         List<String> arrayList = new ArrayList(notAuthPathList);
-        ResServer resServer = securityProperties.getResServer();
+        ResServer resServer = securityProperties.getOauth2().getResServer();
         String[] resourcePaths = resServer.getPaths();
         if(resourcePaths == null){
             arrayList.add("any");

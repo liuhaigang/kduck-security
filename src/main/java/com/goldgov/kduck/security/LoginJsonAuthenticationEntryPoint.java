@@ -7,6 +7,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,15 +17,12 @@ import java.io.IOException;
 /**
  * LiuHG
  */
-public class LoginJsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-    private final String loginPage;
+public class LoginJsonAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private ObjectMapper om = new ObjectMapper();
 
     public LoginJsonAuthenticationEntryPoint(String loginPage) {
-        this.loginPage = loginPage;
+        super(loginPage);
     }
 
     public void commence(HttpServletRequest request, HttpServletResponse response,
@@ -34,7 +32,7 @@ public class LoginJsonAuthenticationEntryPoint implements AuthenticationEntryPoi
             response.setContentType("application/json");
             om.writeValue(response.getOutputStream(),jsonObject);
         }else{
-            redirectStrategy.sendRedirect(request, response, loginPage);
+            super.commence(request,response,authException);
         }
 
     }

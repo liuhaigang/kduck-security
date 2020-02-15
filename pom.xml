@@ -20,6 +20,7 @@
             <groupId>com.goldgov</groupId>
             <artifactId>kduck-core</artifactId>
             <version>1.0.20021312-SNAPSHOT</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

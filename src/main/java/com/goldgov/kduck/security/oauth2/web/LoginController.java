@@ -2,6 +2,7 @@ package com.goldgov.kduck.security.oauth2.web;
 
 import com.goldgov.kduck.security.KduckSecurityProperties;
 import com.goldgov.kduck.security.KduckSecurityProperties.Client;
+import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
 import com.goldgov.kduck.security.KduckSecurityProperties.Provider;
 import com.goldgov.kduck.security.KduckSecurityProperties.Registration;
 import com.goldgov.kduck.web.json.JsonObject;
@@ -127,7 +128,11 @@ public class LoginController {
     }
 
     private Client getClient(){
-        Client client = securityProperties.getClient();
+        OAuth2Config oauth2Config = securityProperties.getOauth2();
+        Client client = null;
+        if(oauth2Config != null){
+            client = oauth2Config.getClient();
+        }
         Assert.notNull(client,"没有配置OAuth客户端信息，请完善配置项：kduck.security.oauth2.client下的provider和registration相关配置项");
 
         return client;
