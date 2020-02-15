@@ -18,7 +18,17 @@ public class KduckSecurityProperties {
     private boolean alwaysUse;
     private boolean forwardToFailureUrl;
 
+    private String[] ignored;
+
     private OAuth2Config oauth2;
+
+    public String[] getIgnored() {
+        return ignored;
+    }
+
+    public void setIgnored(String[] ignored) {
+        this.ignored = ignored;
+    }
 
     public String getSuccessUrlParameter() {
         return successUrlParameter;

@@ -104,7 +104,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v2/**")
                 .antMatchers("/swagger-resources/**")
                 .antMatchers("/error")
-                .antMatchers("/index.html")
 
                 .antMatchers("/oauth/token/code")
                 .antMatchers("/oauth/token/password")
@@ -116,6 +115,20 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/**/sc/**")
                 .antMatchers("/**/*.nocache.js")
                 .antMatchers("/**/*.cache.js");
+
+        if(securityProperties.getLoginPage() != null){
+            web.ignoring().antMatchers(securityProperties.getLoginPage());
+        }
+        if(securityProperties.getDefaultFailureUrl() != null){
+            web.ignoring().antMatchers(securityProperties.getDefaultFailureUrl());
+        }
+
+        String[] ignored = securityProperties.getIgnored();
+        if(ignored != null && ignored.length > 0){
+            for (String i : ignored) {
+                web.ignoring().antMatchers(i);
+            }
+        }
 
     }
 
