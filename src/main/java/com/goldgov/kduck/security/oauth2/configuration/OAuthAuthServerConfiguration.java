@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -29,6 +30,9 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
 
     @Autowired(required = false)
     private JwtAccessTokenConverter accessTokenConverter;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private TokenStore tokenStore;
@@ -72,7 +76,8 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.tokenStore(tokenStore)
-                .authenticationManager(authenticationManager);
+                .authenticationManager(authenticationManager)
+                .userDetailsService(userDetailsService);//刷新接口必须显示的指定userDetailsService，否则会抛UserDetailsService必须但未定义
 
         //JWT
         if(accessTokenConverter != null){

@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/oauth")
-public class LoginController {
+public class AccessTokenController {
 
 //    @Autowired(required = false)
 //    private TokenEndpoint tokenEndpoint;

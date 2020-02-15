@@ -14,6 +14,8 @@ public class KduckSecurityProperties {
     private String defaultSuccessUrl;
     private String defaultFailureUrl;
 
+    private String accessDeniedUrl;
+
     private String successUrlParameter;
     private boolean alwaysUse;
     private boolean forwardToFailureUrl;
@@ -21,6 +23,14 @@ public class KduckSecurityProperties {
     private String[] ignored;
 
     private OAuth2Config oauth2;
+
+    public String getAccessDeniedUrl() {
+        return accessDeniedUrl;
+    }
+
+    public void setAccessDeniedUrl(String accessDeniedUrl) {
+        this.accessDeniedUrl = accessDeniedUrl;
+    }
 
     public String[] getIgnored() {
         return ignored;

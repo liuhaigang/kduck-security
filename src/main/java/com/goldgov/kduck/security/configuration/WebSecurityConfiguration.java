@@ -66,6 +66,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             if(securityProperties.getLoginPage() != null){
                 http.exceptionHandling().authenticationEntryPoint(new LoginJsonAuthenticationEntryPoint(securityProperties.getLoginPage()));
             }
+            if(securityProperties.getAccessDeniedUrl() != null){
+                http.exceptionHandling().accessDeniedPage(securityProperties.getAccessDeniedUrl());
+            }
             //  http.authenticationProvider(new AuthenticationProvider());
         }
     }
