@@ -1,10 +1,12 @@
 package com.goldgov.kduck.security.oauth2.web;
 
-import com.goldgov.kduck.security.KduckSecurityProperties;
+import com.goldgov.kduck.security.*;
 import com.goldgov.kduck.security.KduckSecurityProperties.Client;
 import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
 import com.goldgov.kduck.security.KduckSecurityProperties.Provider;
 import com.goldgov.kduck.security.KduckSecurityProperties.Registration;
+import com.goldgov.kduck.security.handler.LoginFailHandler;
+import com.goldgov.kduck.security.handler.LoginSuccessHandler;
 import com.goldgov.kduck.web.json.JsonObject;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -23,6 +25,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 
 @RestController
@@ -34,6 +40,12 @@ public class AccessTokenController {
 
     @Autowired
     private KduckSecurityProperties securityProperties;
+
+    @Autowired
+    private LoginSuccessHandler successHandler;
+
+    @Autowired
+    private LoginFailHandler failHandler;
 
     /**
      * OAuth客户端认证成功后回调请求，用于获取AccessToken
@@ -75,7 +87,7 @@ public class AccessTokenController {
             @ApiImplicitParam(name = "userName", value = "姓名", paramType = "query"),
             @ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
     })
-    public JsonObject login(String userName, String password){
+    public JsonObject login(String userName, String password, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         Registration registration = getRegistration();
         Provider provider = getProvider();
@@ -91,6 +103,9 @@ public class AccessTokenController {
         OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resourceDetails);
         OAuth2AccessToken accessToken = restTemplate.getAccessToken();
 
+//        AuthUser authUser = AuthUserHolder.getAuthUser();
+//        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(authUser.getUsername(),null,authUser.getAuthorities());
+//        successHandler.onAuthenticationSuccess(request,response,authentication);
         return new JsonObject(accessToken);
     }
 

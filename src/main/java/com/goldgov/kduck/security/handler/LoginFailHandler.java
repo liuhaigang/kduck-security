@@ -1,9 +1,8 @@
-package com.goldgov.kduck.security;
+package com.goldgov.kduck.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -20,9 +19,6 @@ public class LoginFailHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private ObjectMapper om = new ObjectMapper();
 
-    @Autowired(required = false)
-    private LoginFailCallback callback;
-
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         String failMessage =  null;
@@ -36,10 +32,6 @@ public class LoginFailHandler extends SimpleUrlAuthenticationFailureHandler {
            failMessage = "登录失败，用户帐号已过期";
         }else if(exception instanceof CredentialsExpiredException){
             failMessage = "登录失败，帐号密码已过期";
-        }
-
-        if(callback != null){
-            callback.doHandler(exception);
         }
 
         if(RequestUtils.isAjax(request)){

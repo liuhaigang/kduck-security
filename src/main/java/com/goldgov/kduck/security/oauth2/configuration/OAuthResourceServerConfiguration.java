@@ -82,7 +82,14 @@ public class OAuthResourceServerConfiguration extends ResourceServerConfigurerAd
         }
         Collections.sort(arrayList);//主要是把"!"开头（不匹配路径）的路径表达式排到前面。
 
-        http.requestMatcher(new OAuthRequestMatcher(arrayList.toArray(new String[0])));
+        //将"/oauth/user_info"排在首位，如果路径是/oauth/user_info则直接返回true，表示该请求由资源服务器自行处理。因为该请求
+        //需要校验token并且无不需要进行认证。
+        //之所以排在第一个，因为OAuthRequestMatcher过滤器没有那么智能，"!/oauth/**"排在首位会直接排除掉了"/oauth/user_info"
+        String[] pathPattern = new String[arrayList.size() + 1];
+        pathPattern[0] = "/oauth/user_info";
+        System.arraycopy(arrayList.toArray(new String[0]),0,pathPattern,1,arrayList.size());
+
+        http.requestMatcher(new OAuthRequestMatcher(pathPattern));
         // @formatter:off
         http.csrf().disable();
         http.cors().and()

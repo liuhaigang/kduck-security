@@ -2,7 +2,10 @@ package com.goldgov.kduck.security.oauth2.configuration;
 
 import com.goldgov.kduck.security.KduckSecurityProperties;
 import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
+import com.goldgov.kduck.security.oauth2.token.TokenTranslator;
+import com.goldgov.kduck.security.oauth2.token.impl.DefaultTokenTranslator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +44,7 @@ public class TokenConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="kduck.security.oauth2",name="tokenStore",havingValue = "jwt",matchIfMissing=true)
+//    @ConditionalOnProperty(prefix="kduck.security.oauth2",name="tokenStore",havingValue = "jwt",matchIfMissing=true)
     @ConditionalOnBean(JwtTokenExtInfo.class)
     public TokenEnhancer tokenEnhancer(JwtTokenExtInfo jwtTokenExtInfo) {
         return (accessToken, authentication) -> {
@@ -73,6 +76,12 @@ public class TokenConfiguration {
     @ConditionalOnProperty(prefix="kduck.security.oauth2",name="tokenStore",havingValue = "jdbc")
     public TokenStore redisTokenStore(DataSource dataSource) {
         return new JdbcTokenStore(dataSource);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TokenTranslator.class)
+    public TokenTranslator tokenTranslator(){
+        return new DefaultTokenTranslator();
     }
 
 //    @Bean

@@ -160,6 +160,7 @@ public class KduckSecurityProperties {
 
         private String authorizationUri;
         private String tokenUri;
+        private String userInfoUri;
 
         public String getAuthorizationUri() {
             return authorizationUri;
@@ -175,6 +176,14 @@ public class KduckSecurityProperties {
 
         public void setTokenUri(String tokenUri) {
             this.tokenUri = tokenUri;
+        }
+
+        public String getUserInfoUri() {
+            return userInfoUri;
+        }
+
+        public void setUserInfoUri(String userInfoUri) {
+            this.userInfoUri = userInfoUri;
         }
     }
 
@@ -268,7 +277,7 @@ public class KduckSecurityProperties {
      * 资源服务器配置
      */
     public static class ResServer{
-        private String[] paths;
+        private String[] resourcePaths;
 
         private boolean enabled;
 
@@ -280,12 +289,12 @@ public class KduckSecurityProperties {
             this.enabled = enabled;
         }
 
-        public String[] getPaths() {
-            return paths;
+        public String[] getResourcePaths() {
+            return resourcePaths;
         }
 
-        public void setPaths(String[] paths) {
-            this.paths = paths;
+        public void setResourcePaths(String[] resourcePaths) {
+            this.resourcePaths = resourcePaths;
         }
     }
 

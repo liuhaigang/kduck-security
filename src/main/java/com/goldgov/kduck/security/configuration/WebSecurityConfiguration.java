@@ -1,10 +1,15 @@
 package com.goldgov.kduck.security.configuration;
 
-import com.goldgov.kduck.security.*;
+import com.goldgov.kduck.security.AuthenticatedUserFilter;
+import com.goldgov.kduck.security.KduckSecurityProperties;
 import com.goldgov.kduck.security.KduckSecurityProperties.AuthServer;
 import com.goldgov.kduck.security.KduckSecurityProperties.Client;
 import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
 import com.goldgov.kduck.security.KduckSecurityProperties.ResServer;
+import com.goldgov.kduck.security.LoginJsonAuthenticationEntryPoint;
+import com.goldgov.kduck.security.RoleAccessVoter;
+import com.goldgov.kduck.security.handler.LoginFailHandler;
+import com.goldgov.kduck.security.handler.LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +22,8 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.web.filter.GenericFilterBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +55,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         //如果没有配置任何客户端、资源服务器的配置，或者显示的启用了认证服务器，则触发认证配置
         //如果配置任何客户端、资源服务器的配置，又期望拥有认证服务器的功能（即完全集成认证服务），则需要显示的开启认证服务器
-        if((authServer!= null && authServer.isEnabled()) ||
-                (resServer== null || !resServer.isEnabled()) && client == null){
+//        if((authServer!= null && authServer.isEnabled()) ||
+//                (resServer== null || !resServer.isEnabled()) && client == null || client != null){
             List<AccessDecisionVoter<? extends Object>> voterList = new ArrayList();
             voterList.add(roleAccessVoter);
             http.cors().and()//跨域配置生效，必须调用cors()方法
@@ -60,6 +67,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .failureHandler(loginFailHandler())
                     .loginProcessingUrl("/login")
                     .and().csrf().disable();
+            http.addFilterAfter(authenticatedUserFilter(), ExceptionTranslationFilter.class);
             if(securityProperties.isHttpBasic()){
                 http.httpBasic();
             }
@@ -70,7 +78,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 http.exceptionHandling().accessDeniedPage(securityProperties.getAccessDeniedUrl());
             }
             //  http.authenticationProvider(new AuthenticationProvider());
-        }
+//        }
     }
 
     @Bean
@@ -135,6 +143,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     }
 
+    @Bean
+    public GenericFilterBean authenticatedUserFilter(){
+        return new AuthenticatedUserFilter();
+    }
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {

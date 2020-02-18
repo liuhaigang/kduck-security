@@ -5,6 +5,8 @@ import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * LiuHG
@@ -12,19 +14,19 @@ import java.util.Date;
 public class AuthUser extends User {
 
     private final String userId;
-    private final Date loginDate;
+    private Date loginDate;
     private String loginIp;
+
+    private Map details = new HashMap();
 
     public AuthUser(String userId,String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
         this.userId = userId;
-        loginDate = new Date();
     }
 
     public AuthUser(String userId,String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.userId = userId;
-        loginDate = new Date();
     }
 
     public String getUserId() {
@@ -44,5 +46,17 @@ public class AuthUser extends User {
             return;
         }
         this.loginIp = loginIp;
+    }
+
+    public void setDetailsItem(String name,Object value) {
+        details.put(name,value);
+    }
+
+    public Object getDetailsItem(String name) {
+        return details.get(name);
+    }
+
+    public void setLoginDate(Date loginDate) {
+        this.loginDate = loginDate;
     }
 }
