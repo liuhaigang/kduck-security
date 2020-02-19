@@ -116,6 +116,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-resources/**")
                 .antMatchers("/error")
 
+                .antMatchers("/favicon.ico")
+
                 .antMatchers("/oauth/token/code")
                 .antMatchers("/oauth/token/password")
                 .antMatchers("/oauth/token/client")

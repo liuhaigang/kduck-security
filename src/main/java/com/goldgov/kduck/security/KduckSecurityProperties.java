@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 
@@ -158,11 +159,27 @@ public class KduckSecurityProperties {
 
     public static class Provider {
 
-        private String authorizationUri;
-        private String tokenUri;
-        private String userInfoUri;
+        private String hostUri;
+
+        private String authorizationUri = "/oauth/authorize";
+        private String tokenUri = "/oauth/token";
+        private String userInfoUri = "/oauth/user_info";
+
+        public String getHostUri() {
+            if(hostUri.endsWith("/")){
+                return hostUri.substring(0,hostUri.length()-1);
+            }
+            return hostUri;
+        }
+
+        public void setHostUri(String hostUri) {
+            this.hostUri = hostUri;
+        }
 
         public String getAuthorizationUri() {
+            if(StringUtils.hasText(hostUri) && !authorizationUri.startsWith("http")){
+                return getHostUri() + authorizationUri;
+            }
             return authorizationUri;
         }
 
@@ -171,6 +188,9 @@ public class KduckSecurityProperties {
         }
 
         public String getTokenUri() {
+            if(StringUtils.hasText(hostUri) && !tokenUri.startsWith("http")){
+                return getHostUri() + tokenUri;
+            }
             return tokenUri;
         }
 
@@ -179,6 +199,9 @@ public class KduckSecurityProperties {
         }
 
         public String getUserInfoUri() {
+            if(StringUtils.hasText(hostUri) && !userInfoUri.startsWith("http")){
+                return getHostUri() + userInfoUri;
+            }
             return userInfoUri;
         }
 

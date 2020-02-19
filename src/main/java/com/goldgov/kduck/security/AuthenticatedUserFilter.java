@@ -11,6 +11,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -59,29 +61,41 @@ public class AuthenticatedUserFilter extends GenericFilterBean {
 //                throw new IllegalArgumentException("Oauth2调用获取用户接口失败，缺少kduck.security.oauth2.client.provider.userInfoUri配置");
                 Provider provider = securityProperties.getOauth2().getClient().getProvider();
 
+                URI uri;
                 try {
-                    URI uri = new URI(provider.getUserInfoUri());
-                    if(!httpRequest.getRequestURI().equals(uri.getPath())){
-                        ResponseEntity<UserInfo> authUserEntity = restTemplate.getForEntity(
-                                provider.getUserInfoUri() + "?" + OAuth2AccessToken.ACCESS_TOKEN + "=" + accessToken, UserInfo.class);
-                        UserInfo userInfo = authUserEntity.getBody();
-                        if(userInfo != null){
-                            List<String> authorities = userInfo.getAuthorities();
-                            List<GrantedAuthority> authoritiesSet = new ArrayList<>(authorities.size());
-                            if(authorities != null){
-                                for (String authority : authorities) {
-                                    authoritiesSet.add(new SimpleGrantedAuthority(authority));
-                                }
-                            }
-                            AuthUser authUser = new AuthUser(userInfo.getUserId(),userInfo.getUsername(),"",authoritiesSet);
-                            authUser.eraseCredentials();
-                            AuthUserHolder.setAuthUser(authUser);
-                            CacheHelper.put(accessToken,authUser,3600);
-                        }
-                    }
+                    uri = new URI(provider.getUserInfoUri());
                 } catch (URISyntaxException e) {
-                    e.printStackTrace();
+                    throw new ServletException("user_info的链接格式不合法：" + provider.getUserInfoUri(),e);
                 }
+
+                if(!httpRequest.getRequestURI().equals(uri.getPath())){
+
+                    ResponseEntity<UserInfo> authUserEntity;
+                     String userInfoUrl = provider.getUserInfoUri() + "?" + OAuth2AccessToken.ACCESS_TOKEN + "=" + accessToken;
+                    try{
+                        authUserEntity = restTemplate.getForEntity(userInfoUrl, UserInfo.class);
+                    }catch(HttpClientErrorException e){
+                        throw new ServletException("调用用户信息接口返回客户端错误（4xx）：CODE=" + e.getRawStatusCode() + "，URL=" + userInfoUrl,e);
+                    }catch(HttpServerErrorException e){
+                        throw new ServletException("调用用户信息接口返回服务端错误（5xx）：CODE=" + e.getRawStatusCode() + "，URL=" + userInfoUrl,e);
+                    }
+
+                    UserInfo userInfo = authUserEntity.getBody();
+                    if(userInfo != null){
+                        List<String> authorities = userInfo.getAuthorities();
+                        List<GrantedAuthority> authoritiesSet = new ArrayList<>(authorities.size());
+                        if(authorities != null){
+                            for (String authority : authorities) {
+                                authoritiesSet.add(new SimpleGrantedAuthority(authority));
+                            }
+                        }
+                        AuthUser authUser = new AuthUser(userInfo.getUserId(),userInfo.getUsername(),"",authoritiesSet);
+                        authUser.eraseCredentials();
+                        AuthUserHolder.setAuthUser(authUser);
+                        CacheHelper.put(accessToken,authUser,3600);
+                    }
+                }
+
             }
         }else{
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

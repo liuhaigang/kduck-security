@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -25,13 +26,23 @@ public class AuthenticationSuccessListener implements ApplicationListener<Intera
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         Authentication authentication = event.getAuthentication();
-//        AuthUser principal = (AuthUser)authentication.getPrincipal();
-//        principal.setLoginDate(new Date());
-//        principal.setLoginIp(request.getRemoteAddr());
-//        if(callbackList != null){
-//            for (AuthenticationSuccessCallback callback : callbackList) {
-//                callback.doHandler(principal);
-//            }
-//        }
+        Object principal = authentication.getPrincipal();
+        AuthUser authUser;
+        if(principal instanceof AuthUser){
+            authUser = (AuthUser)principal;
+        } else if(principal instanceof User){
+            User user = (User) principal;
+            authUser = new AuthUser(null,user.getUsername(),"",user.isEnabled(),user.isAccountNonExpired(),user.isCredentialsNonExpired(),user.isAccountNonLocked(),user.getAuthorities());
+        } else {
+            throw new RuntimeException("未知认证对象：" + principal);
+        }
+        authUser.eraseCredentials();
+        authUser.setLoginDate(new Date());
+        authUser.setLoginIp(request.getRemoteAddr());
+        if(callbackList != null){
+            for (AuthenticationSuccessCallback callback : callbackList) {
+                callback.doHandler(authUser);
+            }
+        }
     }
 }
