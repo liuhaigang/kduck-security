@@ -33,6 +33,6 @@ create table oauth_client_details (
 insert into oauth_client_details
 (client_id, resource_ids, client_secret, scope, authorized_grant_types,web_server_redirect_uri,authorities, access_token_validity,refresh_token_validity, additional_information)
 values
-('client_id','resource_id', '$2a$10$LFo4DsCxmJzcVbUyzcNU6elgSrekeIR0RCr6lS8rGvFr6tH6nn3f.', 'select','client_credentials,password,refresh_token','http://localhost:8000/','admin',null,null,null);
+('client_id','resource_id', '$2a$10$LFo4DsCxmJzcVbUyzcNU6elgSrekeIR0RCr6lS8rGvFr6tH6nn3f.', 'all','client_credentials,password,refresh_token','http://localhost:8000/','admin',null,null,null);
 
 

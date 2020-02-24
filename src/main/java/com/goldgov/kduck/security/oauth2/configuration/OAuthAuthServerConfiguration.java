@@ -1,5 +1,6 @@
 package com.goldgov.kduck.security.oauth2.configuration;
 
+import com.goldgov.kduck.security.filter.PreAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -44,6 +45,9 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
     private TokenEnhancer tokenEnhancer;
 
     @Autowired
+    private PreAuthenticationFilter preAuthenticationFilter;
+
+    @Autowired
     public OAuthAuthServerConfiguration(AuthenticationManager authenticationManager){
         this.authenticationManager = authenticationManager;
     }
@@ -51,6 +55,7 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
         security.allowFormAuthenticationForClients();
+        security.addTokenEndpointAuthenticationFilter(preAuthenticationFilter);
 //        security.checkTokenAccess("permitAll()");
     }
 

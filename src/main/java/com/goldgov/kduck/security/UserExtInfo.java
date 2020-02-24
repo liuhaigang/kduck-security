@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security;
 
 
+
 import com.goldgov.kduck.service.ValueMap;
 
 /**
@@ -8,5 +9,5 @@ import com.goldgov.kduck.service.ValueMap;
  */
 public interface UserExtInfo {
 
-    ValueMap getUserExtInfo(AuthUser user);
+    ValueMap getUserExtInfo(String userId);
 }

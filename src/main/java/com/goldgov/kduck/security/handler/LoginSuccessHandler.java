@@ -1,7 +1,6 @@
 package com.goldgov.kduck.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.goldgov.kduck.security.AuthUser;
 import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.security.core.Authentication;
@@ -21,10 +20,9 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        AuthUser principal = (AuthUser)authentication.getPrincipal();
 
         if(RequestUtils.isAjax(request)){
-            JsonObject jsonObject = new JsonObject(principal.getUsername());
+            JsonObject jsonObject = new JsonObject(authentication.getName());
             response.setContentType("application/json");
             om.writeValue(response.getOutputStream(),jsonObject);
         }else{

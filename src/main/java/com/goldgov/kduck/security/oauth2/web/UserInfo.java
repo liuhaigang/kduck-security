@@ -1,12 +1,9 @@
 package com.goldgov.kduck.security.oauth2.web;
 
-import com.goldgov.kduck.security.AuthUser;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserInfo {
 
@@ -20,24 +17,9 @@ public class UserInfo {
 
     private boolean clientOnly = false;
 
+    private Map details = new HashMap();
+
     public UserInfo(){}
-
-    public UserInfo(AuthUser authUser){
-        userId = authUser.getUserId();
-        username = authUser.getUsername();
-        Collection<GrantedAuthority> authorities = authUser.getAuthorities();
-        if(authorities != null){
-            this.authorities = new ArrayList<>();
-            for (GrantedAuthority authority : authorities) {
-                this.authorities.add(authority.getAuthority());
-            }
-        }
-
-        accountNonExpired = authUser.isAccountNonExpired();
-        accountNonLocked = authUser.isAccountNonLocked();
-        credentialsNonExpired = authUser.isCredentialsNonExpired();
-        enabled = authUser.isEnabled();
-    }
 
     public String getUserId() {
         return userId;
@@ -101,5 +83,13 @@ public class UserInfo {
 
     public void setClientOnly(boolean clientOnly) {
         this.clientOnly = clientOnly;
+    }
+
+    public Map getDetails() {
+        return details;
+    }
+
+    public void setDetails(Map details) {
+        this.details = details;
     }
 }

@@ -7,5 +7,5 @@ import org.springframework.security.core.Authentication;
  */
 public interface AuthenticationFailCallback {
 
-    void doHandler(Authentication authentication,Exception exception);
+    void doHandle(Authentication authentication, Exception exception,int badCredentialCount);
 }
