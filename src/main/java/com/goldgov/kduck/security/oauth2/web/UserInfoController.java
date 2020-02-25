@@ -1,12 +1,14 @@
 package com.goldgov.kduck.security.oauth2.web;
 
 import com.goldgov.kduck.security.UserExtInfo;
+import com.goldgov.kduck.security.oauth2.exception.AuthUserNotFoundException;
 import com.goldgov.kduck.service.ValueMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +36,12 @@ public class UserInfoController {
             userInfo.setUsername(oauthAuth.getName());
             if(!oauthAuth.isClientOnly()){
                 //根据用户登录名查询认证用户并返回
-                UserDetails authUser = userDetailsService.loadUserByUsername(oauthAuth.getName());
+                UserDetails authUser;
+                try{
+                    authUser = userDetailsService.loadUserByUsername(oauthAuth.getName());
+                }catch (UsernameNotFoundException e){
+                    throw new AuthUserNotFoundException(oauthAuth.getName(),"用户不存在：" + oauthAuth.getName());
+                }
 
                 userInfo.setAccountNonExpired(authUser.isAccountNonExpired());
                 userInfo.setAccountNonLocked(authUser.isAccountNonLocked());
