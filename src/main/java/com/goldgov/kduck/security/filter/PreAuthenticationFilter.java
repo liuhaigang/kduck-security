@@ -71,7 +71,7 @@ public class PreAuthenticationFilter extends GenericFilterBean {
 
         }catch (PreAuthenticationException e){
             if(RequestUtils.isAjax(request)){
-                JsonObject jsonObject = new JsonObject(e.getNotification(),-2,"预认证失败");
+                JsonObject jsonObject = new JsonObject(e.getNotification(),-2,e.getMessage());
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 try {

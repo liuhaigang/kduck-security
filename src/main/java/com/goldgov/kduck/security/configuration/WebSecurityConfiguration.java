@@ -1,10 +1,6 @@
 package com.goldgov.kduck.security.configuration;
 
 import com.goldgov.kduck.security.KduckSecurityProperties;
-import com.goldgov.kduck.security.KduckSecurityProperties.AuthServer;
-import com.goldgov.kduck.security.KduckSecurityProperties.Client;
-import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
-import com.goldgov.kduck.security.KduckSecurityProperties.ResServer;
 import com.goldgov.kduck.security.LoginJsonAuthenticationEntryPoint;
 import com.goldgov.kduck.security.RoleAccessVoter;
 import com.goldgov.kduck.security.filter.PreAuthenticationFilter;
@@ -49,15 +45,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        OAuth2Config oauth2Config = securityProperties.getOauth2();
-        AuthServer authServer = null;
-        ResServer resServer = null;
-        Client client = null;
-        if(oauth2Config != null){
-            authServer = oauth2Config.getAuthServer();
-            resServer = oauth2Config.getResServer();
-            client = oauth2Config.getClient();
-        }
+//        OAuth2Config oauth2Config = securityProperties.getOauth2();
+//        AuthServer authServer = null;
+//        ResServer resServer = null;
+//        Client client = null;
+//        if(oauth2Config != null){
+//            authServer = oauth2Config.getAuthServer();
+//            resServer = oauth2Config.getResServer();
+//            client = oauth2Config.getClient();
+//        }
 
         //如果没有配置任何客户端、资源服务器的配置，或者显示的启用了认证服务器，则触发认证配置
         //如果配置任何客户端、资源服务器的配置，又期望拥有认证服务器的功能（即完全集成认证服务），则需要显示的开启认证服务器
