@@ -3,10 +3,13 @@ package com.goldgov.kduck.security.configuration;
 import com.goldgov.kduck.security.KduckSecurityProperties;
 import com.goldgov.kduck.security.LoginJsonAuthenticationEntryPoint;
 import com.goldgov.kduck.security.RoleAccessVoter;
-import com.goldgov.kduck.security.filter.PreAuthenticationFilter;
-import com.goldgov.kduck.security.filter.PreAuthenticationFilter.PreAuthenticationHandler;
+import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter;
+import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter.AuthenticationFailureStrategyHandler;
 import com.goldgov.kduck.security.handler.LoginFailHandler;
 import com.goldgov.kduck.security.handler.LoginSuccessHandler;
+import com.goldgov.kduck.security.mfa.MfaUserDetailsService;
+import com.goldgov.kduck.security.mfa.impl.MfaUserDetailsServiceImpl;
+import com.goldgov.kduck.security.mfa.oauth2.MfaAuthenticatorService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,48 +44,42 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private KduckSecurityProperties securityProperties;
 
-    private PreAuthenticationFilter preAuthenticationFilter;
+    @Autowired(required = false)
+    private List<HttpSecurityConfigurer> httpSecurityConfigurerList;
+
+    private AuthenticationFailureStrategyFilter failureStrategyHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        OAuth2Config oauth2Config = securityProperties.getOauth2();
-//        AuthServer authServer = null;
-//        ResServer resServer = null;
-//        Client client = null;
-//        if(oauth2Config != null){
-//            authServer = oauth2Config.getAuthServer();
-//            resServer = oauth2Config.getResServer();
-//            client = oauth2Config.getClient();
-//        }
-
-        //如果没有配置任何客户端、资源服务器的配置，或者显示的启用了认证服务器，则触发认证配置
-        //如果配置任何客户端、资源服务器的配置，又期望拥有认证服务器的功能（即完全集成认证服务），则需要显示的开启认证服务器
-//        if((authServer!= null && authServer.isEnabled()) ||
-//                (resServer== null || !resServer.isEnabled()) && client == null || client != null){
-            List<AccessDecisionVoter<? extends Object>> voterList = new ArrayList();
-            voterList.add(roleAccessVoter);
-            http.cors().and()//跨域配置生效，必须调用cors()方法
-                    .authorizeRequests().accessDecisionManager(new AffirmativeBased(voterList))
-                    .anyRequest().authenticated()
-                    .and().formLogin()
+        List<AccessDecisionVoter<? extends Object>> voterList = new ArrayList();
+        voterList.add(roleAccessVoter);
+        http.cors().and()//跨域配置生效，必须调用cors()方法
+                .authorizeRequests().accessDecisionManager(new AffirmativeBased(voterList))
+                .anyRequest().authenticated()
+                .and().formLogin()
 //                    .authenticationDetailsSource(new WebAuthenticationDetailsSource())
-                    .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖.failureHandler同理
-                    .failureHandler(loginFailHandler())
-                    .loginProcessingUrl("/login")
-                    .and().csrf().disable();
-            http.addFilterBefore(preAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//            http.addFilterAfter(authenticatedUserFilter(), ExceptionTranslationFilter.class);
-            if(securityProperties.isHttpBasic()){
-                http.httpBasic();
+                .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖.failureHandler同理
+                .failureHandler(loginFailHandler())
+                .loginProcessingUrl("/login")
+                .and().csrf().disable();
+        http.addFilterBefore(failureStrategyHandler, UsernamePasswordAuthenticationFilter.class);
+
+        if(securityProperties.isHttpBasic()){
+            http.httpBasic();
+        }
+        if(securityProperties.getLoginPage() != null){
+            http.exceptionHandling().authenticationEntryPoint(new LoginJsonAuthenticationEntryPoint(securityProperties.getLoginPage()));
+        }
+        if(securityProperties.getAccessDeniedUrl() != null){
+            http.exceptionHandling().accessDeniedPage(securityProperties.getAccessDeniedUrl());
+        }
+
+        if(httpSecurityConfigurerList != null && !httpSecurityConfigurerList.isEmpty()){
+            for (HttpSecurityConfigurer securityConfigurer : httpSecurityConfigurerList) {
+                securityConfigurer.configure(http);
             }
-            if(securityProperties.getLoginPage() != null){
-                http.exceptionHandling().authenticationEntryPoint(new LoginJsonAuthenticationEntryPoint(securityProperties.getLoginPage()));
-            }
-            if(securityProperties.getAccessDeniedUrl() != null){
-                http.exceptionHandling().accessDeniedPage(securityProperties.getAccessDeniedUrl());
-            }
-            //  http.authenticationProvider(new AuthenticationProvider());
-//        }
+        }
+//              http.authenticationProvider(new AuthenticationProvider());
     }
 
     @Bean
@@ -140,6 +137,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             web.ignoring().antMatchers(securityProperties.getDefaultFailureUrl());
         }
 
+        if(securityProperties.getMfa() != null && securityProperties.getMfa().getMfaPage() != null){
+            web.ignoring().antMatchers(securityProperties.getMfa().getMfaPage());
+        }else{
+            web.ignoring().antMatchers("/mfaPage.html");
+        }
+
         String[] ignored = securityProperties.getIgnored();
         if(ignored != null && ignored.length > 0){
             for (String i : ignored) {
@@ -147,18 +150,19 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             }
         }
 
+        if(httpSecurityConfigurerList != null && !httpSecurityConfigurerList.isEmpty()){
+            for (HttpSecurityConfigurer securityConfigurer : httpSecurityConfigurerList) {
+                securityConfigurer.configure(web);
+            }
+        }
+
     }
 
-//    @Bean
-//    public GenericFilterBean authenticatedUserFilter(){
-//        return new AuthenticatedUserFilter();
-//    }
-
     @Bean
-    public GenericFilterBean preAuthenticationFilter(ObjectProvider<PreAuthenticationHandler> objectProvider){
-        List<PreAuthenticationHandler> preAuthList = Collections.unmodifiableList(new ArrayList<>(objectProvider.stream().collect(Collectors.toList())));
-        this.preAuthenticationFilter = new PreAuthenticationFilter(preAuthList);
-        return preAuthenticationFilter;
+    public GenericFilterBean preAuthenticationFilter(ObjectProvider<AuthenticationFailureStrategyHandler> objectProvider){
+        List<AuthenticationFailureStrategyHandler> failureStrategyHandlerList = Collections.unmodifiableList(new ArrayList<>(objectProvider.stream().collect(Collectors.toList())));
+        this.failureStrategyHandler = new AuthenticationFailureStrategyFilter(failureStrategyHandlerList);
+        return failureStrategyHandler;
     }
 
 

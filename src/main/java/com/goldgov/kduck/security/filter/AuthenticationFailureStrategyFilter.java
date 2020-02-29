@@ -2,7 +2,7 @@ package com.goldgov.kduck.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goldgov.kduck.cache.CacheHelper;
-import com.goldgov.kduck.security.exception.PreAuthenticationException;
+import com.goldgov.kduck.security.exception.AuthenticationFailureException;
 import com.goldgov.kduck.security.listener.AuthenticationFailListener;
 import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-public class PreAuthenticationFilter extends GenericFilterBean {
+public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
 
     public static final String FORM_USERNAME_KEY = "username";
     public static final String OAUTH2_USERNAME_KEY = "client_id";
@@ -35,7 +35,7 @@ public class PreAuthenticationFilter extends GenericFilterBean {
 
     private String usernameParameter = FORM_USERNAME_KEY;
 
-    private final List<PreAuthenticationHandler> preAuthenticationHandlerList;
+    private final List<AuthenticationFailureStrategyHandler> failureStrategyHandlerList;
     private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
 
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
@@ -44,8 +44,8 @@ public class PreAuthenticationFilter extends GenericFilterBean {
 
     private RequestMatcher requestMatcher;
 
-    public PreAuthenticationFilter(List<PreAuthenticationHandler> preAuthenticationHandlerList){
-        this.preAuthenticationHandlerList = preAuthenticationHandlerList;
+    public AuthenticationFailureStrategyFilter(List<AuthenticationFailureStrategyHandler> failureStrategyHandlerList){
+        this.failureStrategyHandlerList = failureStrategyHandlerList;
         this.requestMatcher = new OrRequestMatcher(
                 new AntPathRequestMatcher("/oauth/token"),
                 new AntPathRequestMatcher("/login", "POST")
@@ -69,7 +69,7 @@ public class PreAuthenticationFilter extends GenericFilterBean {
 
             chain.doFilter(request, response);
 
-        }catch (PreAuthenticationException e){
+        }catch (AuthenticationFailureException e){
             if(RequestUtils.isAjax(request)){
                 JsonObject jsonObject = new JsonObject(e.getNotification(),-2,e.getMessage());
                 response.setContentType("application/json");
@@ -101,9 +101,9 @@ public class PreAuthenticationFilter extends GenericFilterBean {
      * 如果预认证失败需要以PreAuthenticationException或子类异常方式返回
      * @param request
      * @param response
-     * @throws PreAuthenticationException
+     * @throws AuthenticationFailureException
      */
-    public void attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws PreAuthenticationException {
+    public void attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationFailureException {
         String username = obtainUsername(request);
         if (username == null) {
             username = "";
@@ -117,10 +117,10 @@ public class PreAuthenticationFilter extends GenericFilterBean {
 
         setDetails(request, authRequest);
 
-        for (PreAuthenticationHandler preAuthenticationHandler : preAuthenticationHandlerList) {
-            if(preAuthenticationHandler.supports(authRequest,request)) {
+        for (AuthenticationFailureStrategyHandler failureStrategyHandler : failureStrategyHandlerList) {
+            if(failureStrategyHandler.supports(authRequest,request)) {
                 //如果没有任何预认证问题则无需处理，否则以抛出PreAuthenticationException异常的方式体现预认证错误
-                preAuthenticationHandler.authenticate(authRequest,request);
+                failureStrategyHandler.authenticate(authRequest,request);
             }
         }
     }
@@ -160,11 +160,11 @@ public class PreAuthenticationFilter extends GenericFilterBean {
         }
     }
 
-    public interface PreAuthenticationHandler {
+    public interface AuthenticationFailureStrategyHandler {
 
         boolean supports(PreAuthenticationToken authentication,HttpServletRequest httpRequest);
 
-        void authenticate(PreAuthenticationToken authentication,HttpServletRequest httpRequest) throws PreAuthenticationException;
+        void authenticate(PreAuthenticationToken authentication,HttpServletRequest httpRequest) throws AuthenticationFailureException;
 
     }
 

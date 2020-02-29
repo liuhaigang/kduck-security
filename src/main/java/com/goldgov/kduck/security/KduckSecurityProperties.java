@@ -23,7 +23,17 @@ public class KduckSecurityProperties {
 
     private String[] ignored;
 
+    private MfaConfig mfa;
+
     private OAuth2Config oauth2;
+
+    public MfaConfig getMfa() {
+        return mfa;
+    }
+
+    public void setMfa(MfaConfig mfa) {
+        this.mfa = mfa;
+    }
 
     public String getAccessDeniedUrl() {
         return accessDeniedUrl;
@@ -333,6 +343,57 @@ public class KduckSecurityProperties {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
+        }
+    }
+
+    /**
+     * 多因素认证配置
+     */
+    public static class MfaConfig {
+        private boolean enabled;
+        private String validateUrl;
+        private String mfaPage;
+        private String type;//TOTP，CODE
+        private String sendStrategy;//mail,sms
+
+        public String getSendStrategy() {
+            return sendStrategy;
+        }
+
+        public void setSendStrategy(String sendStrategy) {
+            this.sendStrategy = sendStrategy;
+        }
+
+        public String getValidateUrl() {
+            return validateUrl;
+        }
+
+        public void setValidateUrl(String validateUrl) {
+            this.validateUrl = validateUrl;
+        }
+
+        public String getMfaPage() {
+            return mfaPage;
+        }
+
+        public void setMfaPage(String mfaPage) {
+            this.mfaPage = mfaPage;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
     }
 

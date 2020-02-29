@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -48,14 +47,14 @@ public class AuthenticationFailListener implements ApplicationListener<AbstractA
         return count;
     }
 
-    @Component
-    public static class AuthenticationSuccessListener implements ApplicationListener<InteractiveAuthenticationSuccessEvent> {
-        @Override
-        public void onApplicationEvent(InteractiveAuthenticationSuccessEvent event) {
-            Authentication authentication = event.getAuthentication();
-            if(authentication instanceof UsernamePasswordAuthenticationToken){
-                CacheHelper.evict(AUTHENTICATION_FAIL_CAHCE_NAME,authentication.getName());
-            }
-        }
-    }
+//    @Component
+//    public static class AuthenticationSuccessListener implements ApplicationListener<InteractiveAuthenticationSuccessEvent> {
+//        @Override
+//        public void onApplicationEvent(InteractiveAuthenticationSuccessEvent event) {
+//            Authentication authentication = event.getAuthentication();
+//            if(authentication instanceof UsernamePasswordAuthenticationToken){
+//                CacheHelper.evict(AUTHENTICATION_FAIL_CAHCE_NAME,authentication.getName());
+//            }
+//        }
+//    }
 }

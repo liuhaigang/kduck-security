@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goldgov.kduck.security.mfa.exception.MfaValidationException;
 import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.security.authentication.*;
@@ -32,10 +33,14 @@ public class LoginFailHandler extends SimpleUrlAuthenticationFailureHandler {
            failMessage = "登录失败，用户帐号已过期";
         }else if(exception instanceof CredentialsExpiredException){
             failMessage = "登录失败，帐号密码已过期";
+        }else {
+            failMessage = exception.getMessage();
         }
 
+        boolean isMfa = exception instanceof MfaValidationException;
+
         if(RequestUtils.isAjax(request)){
-            JsonObject jsonObject = new JsonObject(null,-1,failMessage);
+            JsonObject jsonObject = new JsonObject(null,isMfa? -3 : -1 ,failMessage);
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             om.writeValue(response.getOutputStream(),jsonObject);

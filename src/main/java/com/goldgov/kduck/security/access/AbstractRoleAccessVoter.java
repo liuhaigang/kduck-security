@@ -1,6 +1,7 @@
 package com.goldgov.kduck.security.access;
 
 import com.goldgov.kduck.security.RoleAccessVoter;
+import com.goldgov.kduck.security.mfa.MfaAuthenticationToken;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
@@ -28,7 +29,7 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
 
     private boolean isFullyAuthenticated(Authentication authentication) {
         return (!authenticationTrustResolver.isAnonymous(authentication) && !authenticationTrustResolver
-                .isRememberMe(authentication));
+                .isRememberMe(authentication)) && !(authentication instanceof MfaAuthenticationToken);
     }
 
     @Override

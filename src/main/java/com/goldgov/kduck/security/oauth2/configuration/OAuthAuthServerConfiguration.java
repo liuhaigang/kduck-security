@@ -1,6 +1,10 @@
 package com.goldgov.kduck.security.oauth2.configuration;
 
-import com.goldgov.kduck.security.filter.PreAuthenticationFilter;
+import com.goldgov.kduck.security.KduckSecurityProperties;
+import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter;
+import com.goldgov.kduck.security.mfa.oauth2.MfaAuthenticatorService;
+import com.goldgov.kduck.security.mfa.oauth2.MfaTokenGranter;
+import com.goldgov.kduck.security.mfa.oauth2.MfaPasswordTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,6 +16,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.CompositeTokenGranter;
+import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -29,6 +35,9 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
 
     private final AuthenticationManager authenticationManager;
 
+    @Autowired
+    private KduckSecurityProperties securityProperties;
+
     @Autowired(required = false)
     private JwtAccessTokenConverter accessTokenConverter;
 
@@ -45,7 +54,10 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
     private TokenEnhancer tokenEnhancer;
 
     @Autowired
-    private PreAuthenticationFilter preAuthenticationFilter;
+    private AuthenticationFailureStrategyFilter preAuthenticationFilter;
+
+    @Autowired(required = false)
+    private MfaAuthenticatorService mfaService;
 
     @Autowired
     public OAuthAuthServerConfiguration(AuthenticationManager authenticationManager){
@@ -57,6 +69,7 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
         security.allowFormAuthenticationForClients();
         security.addTokenEndpointAuthenticationFilter(preAuthenticationFilter);
 //        security.checkTokenAccess("permitAll()");
+
     }
 
     @Override
@@ -80,9 +93,16 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.tokenStore(tokenStore)
-                .authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);//刷新接口必须显示的指定userDetailsService，否则会抛UserDetailsService必须但未定义
+
+        if(securityProperties.getMfa() != null && securityProperties.getMfa().isEnabled()){
+            endpoints.tokenGranter(tokenGranter(endpoints));
+        }else{
+            //下面一行此处仅用于判定是否启用密码授权模式，如果启用了mfa，为了下面的tokenGranter(endpoints)方法不注入密码模式的TokenGranter。
+            //将其注释，不会影响原有逻辑，如果不启用mfa才让其生效，且无需执行下面的tokenGranter(endpoints)方法。
+            endpoints.tokenStore(tokenStore).authenticationManager(authenticationManager);
+        }
+
+        endpoints.tokenStore(tokenStore).userDetailsService(userDetailsService);//刷新接口必须显示的指定userDetailsService，否则会抛UserDetailsService必须但未定义
 
         //JWT
         if(accessTokenConverter != null){
@@ -100,8 +120,18 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
         }
 
 
+
+
 //        endpoints.pathMapping("/oauth/confirm_access", "/oauth/confirm_access")
 //        endpoints.authorizationCodeServices()
     }
 
+
+    private TokenGranter tokenGranter(final AuthorizationServerEndpointsConfigurer endpoints) {
+        List<TokenGranter> granters = new ArrayList();
+        granters.add(endpoints.getTokenGranter());//获取默认的TokenGranter，但由于密码模式是自定义的，因此不能将密码模式默认构建，需要将上面的指定authenticationManager注释掉
+        granters.add(new MfaPasswordTokenGranter(endpoints, authenticationManager));
+        granters.add(new MfaTokenGranter(endpoints, authenticationManager, mfaService));
+        return new CompositeTokenGranter(granters);
+    }
 }
