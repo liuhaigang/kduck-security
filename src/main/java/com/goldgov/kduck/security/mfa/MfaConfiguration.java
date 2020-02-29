@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Configuration
@@ -83,11 +84,24 @@ public class MfaConfiguration implements HttpSecurityConfigurer {
 //    }
 
     @Bean
+    @ConditionalOnMissingBean(MfaUserDetailsService.class)
     public MfaUserDetailsService mfaUserDetailsService(){
-        return new MfaUserDetailsServiceImpl();
+        MfaUserDetailsServiceImpl mfaUserDetailsService = new MfaUserDetailsServiceImpl();
+
+        if(securityProperties.getMfa() != null && securityProperties.getMfa().getMfaUsers() != null){
+            String[] mfaUsers = securityProperties.getMfa().getMfaUsers();
+            for (String mfaUser : mfaUsers) {
+                String[] split = mfaUser.split(":");
+                Assert.isTrue(split.length==2,"多因素认证用户格式不正确，正确格式（冒号分隔）：username:secret");
+                mfaUserDetailsService.addMfaUser(split[0],split[1]);
+            }
+        }
+
+        return mfaUserDetailsService;
     }
 
     @Bean
+    @ConditionalOnMissingBean(MfaTokenService.class)
     public MfaTokenService mfaTokenService(){
         MfaType type = MfaType.TOTP;
         if(securityProperties.getMfa() != null && securityProperties.getMfa().getType() != null){

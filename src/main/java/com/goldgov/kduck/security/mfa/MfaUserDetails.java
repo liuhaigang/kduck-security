@@ -5,24 +5,22 @@ import java.util.Map;
 public interface MfaUserDetails {
 
     String getUsername();
-    String[] getType();
     String getSecret();
+    String getMail();
+    String getPhone();
     Map<String,Object> getDetails();
 
 
     class SimpleMfaUserDetails implements MfaUserDetails{
 
         private String username;
-        private String[] type;
         private String secret;
+        private String mail;
+        private String phone;
         private Map<String, Object> details;
 
         public void setUsername(String username) {
             this.username = username;
-        }
-
-        public void setType(String[] type) {
-            this.type = type;
         }
 
         public void setSecret(String secret) {
@@ -33,14 +31,27 @@ public interface MfaUserDetails {
             this.details = details;
         }
 
-        @Override
-        public String getUsername() {
-            return username;
+        public void setMail(String mail) {
+            this.mail = mail;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
         }
 
         @Override
-        public String[] getType() {
-            return type;
+        public String getMail() {
+            return mail;
+        }
+
+        @Override
+        public String getPhone() {
+            return phone;
+        }
+
+        @Override
+        public String getUsername() {
+            return username;
         }
 
         @Override

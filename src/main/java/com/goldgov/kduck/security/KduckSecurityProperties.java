@@ -356,6 +356,16 @@ public class KduckSecurityProperties {
         private String type;//TOTP，CODE
         private String sendStrategy;//mail,sms
 
+        private String[] mfaUsers;
+
+        public String[] getMfaUsers() {
+            return mfaUsers;
+        }
+
+        public void setMfaUsers(String[] mfaUsers) {
+            this.mfaUsers = mfaUsers;
+        }
+
         public String getSendStrategy() {
             return sendStrategy;
         }

@@ -39,7 +39,11 @@ public class MfaTokenServiceImpl implements MfaTokenService {
             return totpPassword == tokenCode;
         }else if(type == MfaType.CODE){
             String cachedToken = CacheHelper.get(mfaUserDetails.getUsername(),String.class);
-            return cachedToken.equals(token);
+            if(cachedToken == null) {
+                throw new RuntimeException("用户令牌不存在或已过期：" + mfaUserDetails.getUsername());
+            }
+            cachedToken = cachedToken.toUpperCase();
+            return cachedToken.equals(token.toUpperCase());
         }
         throw new RuntimeException("不支持的MFA令牌类型" + type);
     }
