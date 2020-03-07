@@ -120,7 +120,10 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
         for (AuthenticationFailureStrategyHandler failureStrategyHandler : failureStrategyHandlerList) {
             if(failureStrategyHandler.supports(authRequest,request)) {
                 //如果没有任何预认证问题则无需处理，否则以抛出PreAuthenticationException异常的方式体现预认证错误
-                failureStrategyHandler.authenticate(authRequest,request);
+                boolean clearFailNum = failureStrategyHandler.authenticate(authRequest,request);
+                if(clearFailNum){
+                    CacheHelper.evict(AuthenticationFailListener.AUTHENTICATION_FAIL_CAHCE_NAME, username);
+                }
             }
         }
     }
@@ -164,7 +167,7 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
 
         boolean supports(PreAuthenticationToken authentication,HttpServletRequest httpRequest);
 
-        void authenticate(PreAuthenticationToken authentication,HttpServletRequest httpRequest) throws AuthenticationFailureException;
+        boolean authenticate(PreAuthenticationToken authentication,HttpServletRequest httpRequest) throws AuthenticationFailureException;
 
     }
 

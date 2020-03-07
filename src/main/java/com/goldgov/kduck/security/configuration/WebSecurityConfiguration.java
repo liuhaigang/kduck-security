@@ -7,11 +7,10 @@ import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter;
 import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter.AuthenticationFailureStrategyHandler;
 import com.goldgov.kduck.security.handler.LoginFailHandler;
 import com.goldgov.kduck.security.handler.LoginSuccessHandler;
-import com.goldgov.kduck.security.mfa.MfaUserDetailsService;
-import com.goldgov.kduck.security.mfa.impl.MfaUserDetailsServiceImpl;
-import com.goldgov.kduck.security.mfa.oauth2.MfaAuthenticatorService;
+import com.goldgov.kduck.security.oauth2.matcher.OAuthRequestMatcher;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,12 +48,20 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private AuthenticationFailureStrategyFilter failureStrategyHandler;
 
+    @Value("${kduck.security.oauth2.spring-client:false}")
+    private boolean isSpringClient;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         List<AccessDecisionVoter<? extends Object>> voterList = new ArrayList();
         voterList.add(roleAccessVoter);
+//        http.requestMatcher(new OAuthRequestMatcher(new String[]{"!/oauth2/authorization/**","!/login/oauth2/**","!/userinfo","any"}));
+        if(isSpringClient){
+            http.requestMatcher(new OAuthRequestMatcher(new String[]{"/oauth/**","/login"}));
+        }
         http.cors().and()//跨域配置生效，必须调用cors()方法
                 .authorizeRequests().accessDecisionManager(new AffirmativeBased(voterList))
+//                .antMatchers("/oauth2/authorization/**").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin()
 //                    .authenticationDetailsSource(new WebAuthenticationDetailsSource())
@@ -111,6 +118,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
+                .antMatchers("/**/*.png","/**/*.jpg","/**/*.gif","/**/*.bmp")
+                .antMatchers("/**/*.css","/**/*.js")
+
                 .antMatchers("/swagger-ui.html")
                 .antMatchers("/webjars/**")
                 .antMatchers("/v2/**")
@@ -159,7 +169,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public GenericFilterBean preAuthenticationFilter(ObjectProvider<AuthenticationFailureStrategyHandler> objectProvider){
+    public GenericFilterBean authenticationFailureStrategyFilter(ObjectProvider<AuthenticationFailureStrategyHandler> objectProvider){
         List<AuthenticationFailureStrategyHandler> failureStrategyHandlerList = Collections.unmodifiableList(new ArrayList<>(objectProvider.stream().collect(Collectors.toList())));
         this.failureStrategyHandler = new AuthenticationFailureStrategyFilter(failureStrategyHandlerList);
         return failureStrategyHandler;

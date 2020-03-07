@@ -14,7 +14,7 @@ public class LocalUserInfoController {
     @GetMapping(value = "/currentUser")
     public JsonObject currentUserName(Authentication principal) {
         if(principal == null) return new JsonObject("_ANONYMOUS_");
-        return new JsonObject(principal.getPrincipal());
+        return new JsonObject(principal.getPrincipal(),0,"Authorized");
 //        if(userExtInfo != null){
 //            AuthUser user = (AuthUser) principal.getPrincipal();
 //            ValueMap userExtInfo = this.userExtInfo.getUserExtInfo(user);

@@ -41,6 +41,9 @@ public class OAuthResourceServerConfiguration extends ResourceServerConfigurerAd
         notAuthPathList.add("!/login");
         notAuthPathList.add("!/currentUser");
         notAuthPathList.add("!/mfa/validate");
+        notAuthPathList.add("!/oauth2/authorization/**");
+        notAuthPathList.add("!/login/oauth2/**");
+        notAuthPathList.add("!/user_info");
     }
 
     @Autowired

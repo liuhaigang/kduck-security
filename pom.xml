@@ -7,6 +7,7 @@
     <groupId>com.goldgov</groupId>
     <artifactId>kduck-security</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <!--<version>1.0.20030222-SNAPSHOT</version>-->
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -45,11 +46,12 @@
             <artifactId>googleauth</artifactId>
             <version>1.4.0</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
-            &lt;!&ndash;<optional>true</optional>&ndash;&gt;
-        </dependency>-->
+            <optional>true</optional>
+        </dependency>
+
         <!--<dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
