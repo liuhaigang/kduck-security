@@ -5,8 +5,7 @@ import com.goldgov.kduck.security.KduckSecurityProperties.Client;
 import com.goldgov.kduck.security.KduckSecurityProperties.OAuth2Config;
 import com.goldgov.kduck.security.KduckSecurityProperties.Provider;
 import com.goldgov.kduck.security.KduckSecurityProperties.Registration;
-import com.goldgov.kduck.security.handler.LoginFailHandler;
-import com.goldgov.kduck.security.handler.LoginSuccessHandler;
+import com.goldgov.kduck.security.handler.OAuthTokenSuccessHandler;
 import com.goldgov.kduck.web.json.JsonObject;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -41,11 +40,9 @@ public class AccessTokenController {
     @Autowired
     private KduckSecurityProperties securityProperties;
 
-    @Autowired
-    private LoginSuccessHandler successHandler;
+    @Autowired(required = false)
+    private OAuthTokenSuccessHandler successHandler;
 
-    @Autowired
-    private LoginFailHandler failHandler;
 
     /**
      * OAuth客户端认证成功后回调请求，用于获取AccessToken
@@ -71,6 +68,8 @@ public class AccessTokenController {
 
         OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resourceDetails,oAuth2ClientContext);
         OAuth2AccessToken accessToken = restTemplate.getAccessToken();
+
+        successHandler(accessToken);
 
         return new JsonObject(accessToken);
     }
@@ -106,6 +105,9 @@ public class AccessTokenController {
 //        AuthUser authUser = AuthUserHolder.getAuthUser();
 //        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(authUser.getUsername(),null,authUser.getAuthorities());
 //        successHandler.onAuthenticationSuccess(request,response,authentication);
+
+        successHandler(accessToken);
+
         return new JsonObject(accessToken);
     }
 
@@ -127,7 +129,15 @@ public class AccessTokenController {
         OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resourceDetails);
         OAuth2AccessToken accessToken = restTemplate.getAccessToken();
 
+        successHandler(accessToken);
+
         return new JsonObject(accessToken);
+    }
+
+    private void successHandler(OAuth2AccessToken accessToken) {
+        if(successHandler != null){
+            successHandler.onTokenSuccess(accessToken);
+        }
     }
 
     private Provider getProvider(){

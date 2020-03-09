@@ -7,6 +7,7 @@ import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter;
 import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter.AuthenticationFailureStrategyHandler;
 import com.goldgov.kduck.security.handler.LoginFailHandler;
 import com.goldgov.kduck.security.handler.LoginSuccessHandler;
+import com.goldgov.kduck.security.handler.LogoutSuccessHandler;
 import com.goldgov.kduck.security.oauth2.matcher.OAuthRequestMatcher;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖.failureHandler同理
                 .failureHandler(loginFailHandler())
                 .loginProcessingUrl("/login")
+                .and().logout().logoutSuccessHandler(new LogoutSuccessHandler()) //如果有多个登出地址对应不同的处理事件可使用defaultLogoutSuccessHandlerFor方法
                 .and().csrf().disable();
         http.addFilterBefore(failureStrategyHandler, UsernamePasswordAuthenticationFilter.class);
 

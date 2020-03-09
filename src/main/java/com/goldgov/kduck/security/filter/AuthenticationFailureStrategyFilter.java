@@ -106,7 +106,7 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
     public void attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationFailureException {
         String username = obtainUsername(request);
         if (username == null) {
-            username = "";
+            return;
         }
         username = username.trim();
 
