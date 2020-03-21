@@ -42,9 +42,11 @@ public class UserInfoController {
             UserInfo userInfo = new UserInfo();
 
             String accessToken = request.getParameter(OAuth2AccessToken.ACCESS_TOKEN);
-            OAuth2AccessToken oauth2AccessToken = tokenStore.readAccessToken(accessToken);
-            userInfo.getDetails().put("expiration",oauth2AccessToken.getExpiration());
-            userInfo.getDetails().put("refresh_token",oauth2AccessToken.getRefreshToken().getValue());
+            if(accessToken != null){
+                OAuth2AccessToken oauth2AccessToken = tokenStore.readAccessToken(accessToken);
+                userInfo.getDetails().put("expiration",oauth2AccessToken.getExpiration());
+                userInfo.getDetails().put("refresh_token",oauth2AccessToken.getRefreshToken().getValue());
+            }
 
             userInfo.setUsername(oauthAuth.getName());
             if(!oauthAuth.isClientOnly()){

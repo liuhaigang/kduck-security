@@ -69,7 +69,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖.failureHandler同理
                 .failureHandler(loginFailHandler())
                 .loginProcessingUrl("/login")
-                .and().logout().logoutSuccessHandler(new LogoutSuccessHandler()) //如果有多个登出地址对应不同的处理事件可使用defaultLogoutSuccessHandlerFor方法
+                .and().logout().logoutSuccessHandler(logoutSuccessHandler()) //如果有多个登出地址对应不同的处理事件可使用defaultLogoutSuccessHandlerFor方法
                 .and().csrf().disable();
         http.addFilterBefore(failureStrategyHandler, UsernamePasswordAuthenticationFilter.class);
 
@@ -104,6 +104,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         loginSuccessHandler.setAlwaysUseDefaultTargetUrl(securityProperties.isAlwaysUse());
         return loginSuccessHandler;
     }
+
+    @Bean
+    public LogoutSuccessHandler logoutSuccessHandler(){
+        return new LogoutSuccessHandler();
+    }
+
 
     @Bean
     public LoginFailHandler loginFailHandler(){

@@ -8,6 +8,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.StringUtils;
 
+/**
+ * MFA多因素认证提供器，该认证类会将原始UsernamePasswordAuthenticationToken对象封装到MfaAuthenticationToken对象中，用于认证过滤
+ * 链针对MfaAuthenticationToken类型进行二次认证，同时在封装之前会讲二次认证的授权码生成并发送给访问者（TOTP不发送）。
+ * @author LiuHG
+ */
 public class MfaAuthenticationProvider extends DaoAuthenticationProvider implements AuthenticationProvider {
 
     private MfaTokenService tokenService;

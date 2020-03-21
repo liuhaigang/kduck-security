@@ -1,0 +1,3 @@
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+com.goldgov.kduck.security.analyzer.MissingRoleAccessFailureAnalyzer,\
+com.goldgov.kduck.security.analyzer.MissingUserDetailsServiceFailureAnalyzer

@@ -11,6 +11,8 @@ import org.springframework.security.oauth2.common.exceptions.InvalidGrantExcepti
 
 public class MfaTokenServiceImpl implements MfaTokenService {
 
+    private String MFA_TOKEN_SUFFIX = ".MFA_TOKEN_SUFFIX";
+
     private final MfaType type;
 
     private OtpGenerator otpGenerator = new DefaultOtpGeneratorImpl(6);
@@ -23,7 +25,7 @@ public class MfaTokenServiceImpl implements MfaTokenService {
 
     @Override
     public void addToken(String username, String token) {
-        CacheHelper.put(username,token,3600);
+        CacheHelper.put(username + MFA_TOKEN_SUFFIX,token,3600);
     }
 
     @Override
@@ -38,7 +40,7 @@ public class MfaTokenServiceImpl implements MfaTokenService {
             }
             return totpPassword == tokenCode;
         }else if(type == MfaType.CODE){
-            String cachedToken = CacheHelper.get(mfaUserDetails.getUsername(),String.class);
+            String cachedToken = CacheHelper.get(mfaUserDetails.getUsername() + MFA_TOKEN_SUFFIX,String.class);
             if(cachedToken == null) {
                 throw new RuntimeException("用户令牌不存在或已过期：" + mfaUserDetails.getUsername());
             }
