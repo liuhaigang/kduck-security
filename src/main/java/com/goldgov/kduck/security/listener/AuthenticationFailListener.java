@@ -43,7 +43,12 @@ public class AuthenticationFailListener implements ApplicationListener<AbstractA
     private int increase(String accountName){
         Integer count = CacheHelper.getByCacheName(AUTHENTICATION_FAIL_CAHCE_NAME,accountName,Integer.class);
         count = count == null ? 1 : ++count;
-        CacheHelper.put(AUTHENTICATION_FAIL_CAHCE_NAME,accountName,count,600);//FIXME seconds to config
+        if(count.intValue() == 1){
+            CacheHelper.put(AUTHENTICATION_FAIL_CAHCE_NAME,accountName,count,600);//FIXME seconds to config
+        }else{
+            CacheHelper.put(AUTHENTICATION_FAIL_CAHCE_NAME,accountName,count);
+        }
+
         return count;
     }
 
