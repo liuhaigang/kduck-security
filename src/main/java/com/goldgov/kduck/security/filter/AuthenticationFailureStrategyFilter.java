@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goldgov.kduck.cache.CacheHelper;
 import com.goldgov.kduck.security.exception.AuthenticationFailureException;
 import com.goldgov.kduck.security.listener.AuthenticationFailListener;
+import com.goldgov.kduck.security.listener.AuthenticationFailListener.AuthenticationFailRecord;
 import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -110,10 +111,11 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
         }
         username = username.trim();
 
-        Integer failNum = CacheHelper.getByCacheName(AuthenticationFailListener.AUTHENTICATION_FAIL_CAHCE_NAME, username, Integer.class);
-        failNum = failNum == null ? 0 : failNum;
+//        Integer failNum = CacheHelper.getByCacheName(AuthenticationFailListener.AUTHENTICATION_FAIL_CAHCE_NAME, username, Integer.class);
+//        failNum = failNum == null ? 0 : failNum;
+        AuthenticationFailRecord failRecord = CacheHelper.getByCacheName(AuthenticationFailListener.AUTHENTICATION_FAIL_CAHCE_NAME, username, AuthenticationFailRecord.class);
 
-        PreAuthenticationToken authRequest = new PreAuthenticationToken(username,failNum);
+        PreAuthenticationToken authRequest = new PreAuthenticationToken(username,failRecord);
 
         setDetails(request, authRequest);
 
@@ -139,13 +141,15 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
 
     public static class PreAuthenticationToken extends AbstractAuthenticationToken {
 
-        private final Object principal;
-        private final int failNum;
+        private static final AuthenticationFailRecord NO_FAIL_RECORD = new AuthenticationFailRecord();
 
-        public PreAuthenticationToken(Object principal,int failNum){
+        private final Object principal;
+        private final AuthenticationFailRecord failRecord;
+
+        public PreAuthenticationToken(Object principal,AuthenticationFailRecord failRecord){
             super(null);
             this.principal = principal;
-            this.failNum = failNum;
+            this.failRecord = failRecord;
         }
 
         @Override
@@ -158,8 +162,11 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
             return principal;
         }
 
-        public int getFailNum() {
-            return failNum;
+        public AuthenticationFailRecord getFailRecord() {
+            if(failRecord == null){
+                return NO_FAIL_RECORD;
+            }
+            return failRecord;
         }
     }
 

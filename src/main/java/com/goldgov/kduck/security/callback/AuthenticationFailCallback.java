@@ -1,5 +1,6 @@
 package com.goldgov.kduck.security.callback;
 
+import com.goldgov.kduck.security.listener.AuthenticationFailListener.AuthenticationFailRecord;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -7,5 +8,5 @@ import org.springframework.security.core.Authentication;
  */
 public interface AuthenticationFailCallback {
 
-    void doHandle(Authentication authentication, Exception exception,int badCredentialCount);
+    void doHandle(Authentication authentication, Exception exception, AuthenticationFailRecord failRecord);
 }
