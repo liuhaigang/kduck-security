@@ -60,6 +60,8 @@ public class AuthenticationFailListener implements ApplicationListener<AbstractA
             failRecord.addFailDate(new Date());
         }
 
+        //将登录失败对象放到缓存中，默认最长存放3小时，即3小时后会自动清除失败次数信息
+        //改缓存仅为AuthenticationFailureStrategyFilter提供服务
         CacheHelper.put(AUTHENTICATION_FAIL_CAHCE_NAME, accountName, failRecord,MAX_LOCK_DURATION_SECONDS);
         return failRecord;
     }

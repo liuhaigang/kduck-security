@@ -2,6 +2,7 @@ package com.goldgov.kduck.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goldgov.kduck.cache.CacheHelper;
+import com.goldgov.kduck.security.callback.AuthenticationSuccessCallback;
 import com.goldgov.kduck.security.exception.AuthenticationFailureException;
 import com.goldgov.kduck.security.listener.AuthenticationFailListener;
 import com.goldgov.kduck.security.listener.AuthenticationFailListener.AuthenticationFailRecord;
@@ -9,13 +10,14 @@ import com.goldgov.kduck.utils.RequestUtils;
 import com.goldgov.kduck.web.json.JsonObject;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -27,9 +29,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * 该过滤器会放置在认证过滤器之前，实现根据失败次数等信息，在真正认证前的预认证，比如失败N次后出现验证码、锁定登录时间等等。
+ * 如果前置认证未通过会议AuthenticationFailureException的方式抛出给调用终端
+ * @author LiuHG
+ */
 public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
 
-    public static final String FORM_USERNAME_KEY = "username";
+    public static final String AUTHENTICATION_FAIL_STRATEGY_NAME = "AUTHENTICATION_FAIL_STRATEGY_NAME";
+
+    public static final String FORM_USERNAME_KEY = UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY;
     public static final String OAUTH2_USERNAME_KEY = "client_id";
 
     private ObjectMapper om = new ObjectMapper();
@@ -39,7 +48,7 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
     private final List<AuthenticationFailureStrategyHandler> failureStrategyHandlerList;
     private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+//    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     private SimpleUrlAuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
@@ -121,6 +130,7 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
 
         for (AuthenticationFailureStrategyHandler failureStrategyHandler : failureStrategyHandlerList) {
             if(failureStrategyHandler.supports(authRequest,request)) {
+                CacheHelper.put(AUTHENTICATION_FAIL_STRATEGY_NAME,username,failureStrategyHandler.getClass().getName());
                 //如果没有任何预认证问题则无需处理，否则以抛出PreAuthenticationException异常的方式体现预认证错误
                 boolean clearFailNum = failureStrategyHandler.authenticate(authRequest,request);
                 if(clearFailNum){
@@ -170,10 +180,33 @@ public class AuthenticationFailureStrategyFilter extends GenericFilterBean {
         }
     }
 
+    @Component
+    public static class CleanFailureStrategyInfo implements AuthenticationSuccessCallback {
+
+        @Override
+        public void doHandle(UserDetails user, HttpServletRequest request) {
+            CacheHelper.evict(AuthenticationFailListener.AUTHENTICATION_FAIL_CAHCE_NAME,user.getUsername());
+            CacheHelper.evict(AUTHENTICATION_FAIL_STRATEGY_NAME,user.getUsername());
+        }
+    }
+
+    /**
+     * 认证失败策略处理器，用于处理持续失败的处理策略，用于N次认证失败后出现验证码、锁定登录场景。
+     * 策略处理器可以配置多个，但是某个处理器生效后，其他处理器即使也满足触发策略，也将不会被执行，
+     * 同一时间只有一个策略处理器可以被触发。
+     * @author LiuHG
+     */
     public interface AuthenticationFailureStrategyHandler {
 
         boolean supports(PreAuthenticationToken authentication,HttpServletRequest httpRequest);
 
+        /**
+         *
+         * @param authentication
+         * @param httpRequest
+         * @return 前置校验通过后，是否清除认证失败的计数统计结果。
+         * @throws AuthenticationFailureException
+         */
         boolean authenticate(PreAuthenticationToken authentication,HttpServletRequest httpRequest) throws AuthenticationFailureException;
 
     }

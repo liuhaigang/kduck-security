@@ -12,7 +12,7 @@ public class AuthenticationFailureException extends AuthenticationException {
     }
 
     public AuthenticationFailureException(Object notification) {
-        super("预认证失败");
+        super("前置认证失败");
         this.notification = notification;
     }
 
