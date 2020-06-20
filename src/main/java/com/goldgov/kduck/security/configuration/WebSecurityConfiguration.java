@@ -143,6 +143,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/actuator/health")
 
+                .antMatchers("/remote/**")
+
                 //for gwt
                 .antMatchers("/**/sc/**")
                 .antMatchers("/**/*.nocache.js")
