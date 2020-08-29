@@ -6,7 +6,7 @@
 
     <groupId>com.goldgov</groupId>
     <artifactId>kduck-security</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <!--<version>1.0.20030222-SNAPSHOT</version>-->
 
     <parent>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.goldgov</groupId>
             <artifactId>kduck-core</artifactId>
-            <version>1.0.20040915-SNAPSHOT</version>
+            <version>1.0.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
