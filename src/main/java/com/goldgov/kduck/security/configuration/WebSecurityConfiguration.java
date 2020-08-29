@@ -141,7 +141,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/oauth/token/password")
                 .antMatchers("/oauth/token/client")
 
-                .antMatchers("/actuator/health")
+//                .antMatchers("/actuator/health")
+                .antMatchers("/actuator/**")
 
                 .antMatchers("/proxy/**")
 
