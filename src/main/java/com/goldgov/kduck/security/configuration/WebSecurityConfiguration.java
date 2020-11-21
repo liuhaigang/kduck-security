@@ -3,6 +3,7 @@ package com.goldgov.kduck.security.configuration;
 import com.goldgov.kduck.security.KduckSecurityProperties;
 import com.goldgov.kduck.security.LoginJsonAuthenticationEntryPoint;
 import com.goldgov.kduck.security.RoleAccessVoter;
+import com.goldgov.kduck.security.authentication.KduckAuthenticationDetailsSource;
 import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter;
 import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter.AuthenticationFailureStrategyHandler;
 import com.goldgov.kduck.security.handler.LoginFailHandler;
@@ -47,6 +48,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired(required = false)
     private List<HttpSecurityConfigurer> httpSecurityConfigurerList;
 
+    @Autowired
+    private KduckAuthenticationDetailsSource authenticationDetailsSource;
+
     private AuthenticationFailureStrategyFilter failureStrategyHandler;
 
     @Value("${kduck.security.oauth2.spring-client:false}")
@@ -65,10 +69,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/oauth2/authorization/**").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin()
-//                    .authenticationDetailsSource(new WebAuthenticationDetailsSource())
                 .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖.failureHandler同理
                 .failureHandler(loginFailHandler())
                 .loginProcessingUrl("/login")
+                .authenticationDetailsSource(authenticationDetailsSource)
                 .and().logout().logoutSuccessHandler(logoutSuccessHandler()) //如果有多个登出地址对应不同的处理事件可使用defaultLogoutSuccessHandlerFor方法
                 .and().csrf().disable();
         http.addFilterBefore(failureStrategyHandler, UsernamePasswordAuthenticationFilter.class);
@@ -132,6 +136,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-ui.html")
                 .antMatchers("/webjars/**")
                 .antMatchers("/v2/**")
+                .antMatchers("/v3/**")
                 .antMatchers("/swagger-resources/**")
                 .antMatchers("/error")
 
