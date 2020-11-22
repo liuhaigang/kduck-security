@@ -48,7 +48,11 @@ public class LoginFailHandler extends SimpleUrlAuthenticationFailureHandler {
         boolean isMfa = exception instanceof MfaValidationException;
 
         if(RequestUtils.isAjax(request)){
-            String failureStrategyName = CacheHelper.getByCacheName(AUTHENTICATION_FAIL_STRATEGY_NAME,obtainUsername(request),String.class);
+            String userName = obtainUsername(request);
+            String failureStrategyName = null;
+            if(userName != null){
+                failureStrategyName = CacheHelper.getByCacheName(AUTHENTICATION_FAIL_STRATEGY_NAME, userName,String.class);
+            }
 
             int errorCode = -1;
             if(isMfa){
