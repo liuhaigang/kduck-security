@@ -3,12 +3,13 @@ package com.goldgov.kduck.security.oauth2.configuration;
 import com.goldgov.kduck.security.KduckSecurityProperties;
 import com.goldgov.kduck.security.filter.AuthenticationFailureStrategyFilter;
 import com.goldgov.kduck.security.mfa.oauth2.MfaAuthenticatorService;
-import com.goldgov.kduck.security.mfa.oauth2.MfaTokenGranter;
 import com.goldgov.kduck.security.mfa.oauth2.MfaPasswordTokenGranter;
+import com.goldgov.kduck.security.mfa.oauth2.MfaTokenGranter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -54,6 +55,7 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
     private TokenEnhancer tokenEnhancer;
 
     @Autowired
+    @Lazy
     private AuthenticationFailureStrategyFilter preAuthenticationFilter;
 
     @Autowired(required = false)
@@ -134,4 +136,5 @@ public class OAuthAuthServerConfiguration extends AuthorizationServerConfigurerA
         granters.add(new MfaTokenGranter(endpoints, authenticationManager, mfaService));
         return new CompositeTokenGranter(granters);
     }
+
 }
