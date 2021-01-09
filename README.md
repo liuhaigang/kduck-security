@@ -173,12 +173,16 @@ index.html我们不配置，使用Spring默认的机制，即直接访问index.h
 
 首先我们依照步骤开始访问系统http://127.0.0.1:8080/index.html会转到SpringSecurity的登录页面：
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190235_25ec4978_403814.png "登录页面.png")
+
 输入错误的账号，点击登录后会看到失败页面：
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190304_b4f3463c_403814.png "登录失败.png")
+
 输入成功的账号“liuhg/111111”，登录后可以看到成功页面：
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190340_4a728bf2_403814.png "成功页面.png")
+
 此时我们访问http://127.0.0.1:8080/user/list，会正常返回数据：
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190354_16c016db_403814.png "正常返回数据.png")
+
 然后我们访问http://127.0.0.1:8080/organization/list，请求会被拒绝
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190418_2bd54e0f_403814.png "拒绝访问.png")
 
