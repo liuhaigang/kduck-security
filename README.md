@@ -1,4 +1,4 @@
-# K-Duck-Core
+# K-Duck-Security
 
 # 框架介绍
 K-Duck-Security安全模块是基于kduck-core、Spring Security封装的一套鉴权框架，提供传统的标准认证、授权功能，同时支持OAuth2的鉴权，方便建立基于OAuth2的单点登陆架构。在模块中提供了便捷的使用方式简化复杂的鉴权过程，以及提供了灵活的扩展方式，应对各种安全要求场景。对于认证提供了一套常用的安全管控功能，用于保护用户的账户安全。
@@ -172,13 +172,14 @@ index.html我们不配置，使用Spring默认的机制，即直接访问index.h
 - 登录成功后访问/user/list，返回信息unauthorized.html中的信息
 
 首先我们依照步骤开始访问系统http://127.0.0.1:8080/index.html会转到SpringSecurity的登录页面：
-
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190235_25ec4978_403814.png "登录页面.png")
 输入错误的账号，点击登录后会看到失败页面：
-
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190304_b4f3463c_403814.png "登录失败.png")
 输入成功的账号“liuhg/111111”，登录后可以看到成功页面：
-
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190340_4a728bf2_403814.png "成功页面.png")
 此时我们访问http://127.0.0.1:8080/user/list，会正常返回数据：
-
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190354_16c016db_403814.png "正常返回数据.png")
 然后我们访问http://127.0.0.1:8080/organization/list，请求会被拒绝
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0109/190418_2bd54e0f_403814.png "拒绝访问.png")
 
 这里会被拦截的原因是因为在授权决策器CustomRoleAccessVoter中，listResourceOperateByCode方法中，我们只为用户分配了“/user/list”的权限，如果想访问“/organization/list”接口，我们需要将其配置到返回结果中，当然还有一种方式就是从listAllResourceOperate方法的返回结果中删除“/organization/list”相关的资源，让其成为一个公开资源，而非保护资源。
