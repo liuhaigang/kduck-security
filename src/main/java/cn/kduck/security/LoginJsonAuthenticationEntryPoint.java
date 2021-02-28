@@ -26,7 +26,7 @@ public class LoginJsonAuthenticationEntryPoint extends LoginUrlAuthenticationEnt
                          AuthenticationException authException) throws IOException, ServletException {
         String contextPath = request.getContextPath();
         String requestURI = request.getRequestURI();
-        if(!"/".equals(contextPath)){
+        if(!"".equals(contextPath)){
             requestURI = requestURI.substring(contextPath.length());
         }
         if(requestURI.equals("/currentUser")){
