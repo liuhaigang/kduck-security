@@ -6,7 +6,7 @@
 
     <groupId>cn.kduck</groupId>
     <artifactId>kduck-security</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -111,7 +111,7 @@
             </plugin>
 
             <!-- GPG -->
-            <plugin>
+           <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.6</version>
@@ -123,7 +123,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 </project>

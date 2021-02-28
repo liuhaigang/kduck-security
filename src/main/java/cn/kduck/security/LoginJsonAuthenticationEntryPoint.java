@@ -1,12 +1,9 @@
 package cn.kduck.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import cn.kduck.core.utils.RequestUtils;
 import cn.kduck.core.web.json.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import javax.servlet.ServletException;
@@ -27,7 +24,12 @@ public class LoginJsonAuthenticationEntryPoint extends LoginUrlAuthenticationEnt
 
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        if(request.getRequestURI().equals("/currentUser")){
+        String contextPath = request.getContextPath();
+        String requestURI = request.getRequestURI();
+        if(!"/".equals(contextPath)){
+            requestURI = requestURI.substring(contextPath.length());
+        }
+        if(requestURI.equals("/currentUser")){
             JsonObject jsonObject = new JsonObject("_ANONYMOUS_",-1,null);
             response.setContentType("application/json");
             om.writeValue(response.getOutputStream(),jsonObject);
