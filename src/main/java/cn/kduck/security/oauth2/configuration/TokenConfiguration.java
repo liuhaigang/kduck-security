@@ -3,9 +3,11 @@ package cn.kduck.security.oauth2.configuration;
 import cn.kduck.security.KduckSecurityProperties;
 import cn.kduck.security.KduckSecurityProperties.OAuth2Config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -13,6 +15,7 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.sql.DataSource;
 import java.math.BigInteger;
@@ -76,7 +79,7 @@ public class TokenConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix="kduck.security.oauth2",name="tokenStore",havingValue = "jdbc")
-    public TokenStore redisTokenStore(DataSource dataSource) {
+    public TokenStore jdbcTokenStore(DataSource dataSource) {
         return new JdbcTokenStore(dataSource);
     }
 
@@ -93,6 +96,17 @@ public class TokenConfiguration {
             return new KeyPair(factory.generatePublic(publicSpec), factory.generatePrivate(privateSpec));
         } catch ( Exception e ) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Configuration
+    @ConditionalOnClass(RedisConnectionFactory.class)
+    @ConditionalOnProperty(prefix="kduck.security.oauth2",name="tokenStore",havingValue = "redis")
+    public static class RedisTokenConfiguration{
+
+        @Bean
+        public TokenStore redisTokenStore(RedisConnectionFactory redisConnectionFactory) {
+            return new RedisTokenStore(redisConnectionFactory);
         }
     }
 
