@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
-import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -18,7 +17,7 @@ import java.util.Collection;
 public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
     private AuthenticationTrustResolver authenticationTrustResolver = new AuthenticationTrustResolverImpl();
 
-    private AntPathMatcher pathMatcher =  new AntPathMatcher();
+//    private AntPathMatcher pathMatcher =  new AntPathMatcher();
 
     @Override
     public boolean supports(ConfigAttribute attribute) {
@@ -39,8 +38,8 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
         }
         if(isFullyAuthenticated(authentication)){
             HttpServletRequest request = ((FilterInvocation) object).getRequest();
-            String requestUri = request.getRequestURI();
-            String method = request.getMethod();
+//            String requestUri = request.getRequestURI();
+//            String method = request.getMethod();
 
             if(checkAuthorize(authentication,request)){
                 result= ACCESS_GRANTED;
