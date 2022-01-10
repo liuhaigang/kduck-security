@@ -1,0 +1,75 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "kduck.security.ignored",
+      "type": "java.lang.String[]",
+      "description": "认证授权忽略地址配置。多个用逗号分隔。"
+    },
+    {
+      "name": "kduck.security.default-success-url",
+      "type": "java.lang.String",
+      "description": "默认认证成功后的跳转地址。"
+    },
+    {
+      "name": "kduck.security.success-url-parameter",
+      "type": "java.lang.String",
+      "description": "认证成功后认证地址以参数的方式跳转，此配置为跳转地址的参数名。"
+    },
+    {
+      "name": "kduck.security.always-use",
+      "type": "java.lang.Boolean",
+      "description": "认证成功后是否跳转到默认认证成功后的跳转地址(kduck.security.default-success-url)。默认为false。",
+      "defaultValue": false
+    },
+    {
+      "name": "kduck.security.login-page",
+      "type": "java.lang.String",
+      "description": "认证页面地址（登录页面地址）。",
+      "defaultValue": 1
+    },
+    {
+      "name": "kduck.security.http-basic",
+      "type": "java.lang.Boolean",
+      "description": "是否启用Basic认证。默认为false。",
+      "defaultValue": false
+    },
+    {
+      "name": "kduck.security.mfa.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用多因素认证。默认为false。",
+      "defaultValue": false
+    },
+    {
+      "name": "kduck.security.mfa.type",
+      "type": "java.lang.String",
+      "description": "多因素认证类型。",
+      "defaultValue": "TOTP"
+    },
+    {
+      "name": "kduck.security.mfa.send-strategy",
+      "type": "java.lang.Boolean",
+      "description": "多因素认证码发送策略。通过实现cn.kduck.security.mfa.send.MfaSendStrategy构造新的发送策略",
+      "defaultValue": "sysout"
+    },
+    {
+      "name": "kduck.security.mfa.mfa-users",
+      "type": "java.lang.String[]",
+      "description": "多因素认证用户（未来可能会被废弃）。"
+    }
+  ],
+  "hints": [
+    {
+      "name": "kduck.security.mfa.type",
+      "values": [
+        {
+          "value": "TOTP",
+          "description": "TOTP动态口令。默认值。"
+        },{
+          "value": "CODE",
+          "description": "认证码。"
+        }
+      ]
+    }
+  ]
+}
