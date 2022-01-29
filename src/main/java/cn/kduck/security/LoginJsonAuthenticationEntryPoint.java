@@ -32,6 +32,7 @@ public class LoginJsonAuthenticationEntryPoint extends LoginUrlAuthenticationEnt
         if(requestURI.equals("/currentUser")){
             JsonObject jsonObject = new JsonObject("_ANONYMOUS_",-1,null);
             response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             om.writeValue(response.getOutputStream(),jsonObject);
         }else{
             super.commence(request,response,authException);
