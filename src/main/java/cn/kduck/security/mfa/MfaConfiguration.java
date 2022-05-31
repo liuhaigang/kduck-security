@@ -2,18 +2,19 @@ package cn.kduck.security.mfa;
 
 import cn.kduck.security.KduckSecurityProperties;
 import cn.kduck.security.KduckSecurityProperties.MfaConfig;
+import cn.kduck.security.configuration.HttpSecurityConfigurer;
+import cn.kduck.security.configuration.WebSecurityConfiguration.IgnoringRequestMatcher;
 import cn.kduck.security.mfa.impl.MfaTokenServiceImpl;
 import cn.kduck.security.mfa.impl.MfaUserDetailsServiceImpl;
 import cn.kduck.security.mfa.send.MfaSendStrategy;
 import cn.kduck.security.mfa.send.impl.StdOutSendStrategy;
-import cn.kduck.security.configuration.HttpSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,6 +29,7 @@ public class MfaConfiguration implements HttpSecurityConfigurer {
     private UserDetailsService userDetailsService;
 
     @Autowired
+    @Lazy
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -57,13 +59,8 @@ public class MfaConfiguration implements HttpSecurityConfigurer {
         http.authenticationProvider(mfaAuthenticationProvider());
         http.addFilterAfter(new MfaAuthenticationValidationFilter(
                 mfaUserDetailsService(),
-                mfaTokenService(),validateUrl, successUrl, mfaPage
+                mfaTokenService(),validateUrl, successUrl, mfaPage,new IgnoringRequestMatcher(securityProperties)
         ), UsernamePasswordAuthenticationFilter.class);
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-
     }
 
     @Bean

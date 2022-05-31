@@ -7,5 +7,4 @@ public interface HttpSecurityConfigurer {
 
     void configure(HttpSecurity http) throws Exception;
 
-    void configure(WebSecurity web) throws Exception;
 }

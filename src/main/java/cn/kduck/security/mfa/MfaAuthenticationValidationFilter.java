@@ -1,5 +1,6 @@
 package cn.kduck.security.mfa;
 
+import cn.kduck.security.configuration.WebSecurityConfiguration.IgnoringRequestMatcher;
 import cn.kduck.security.mfa.exception.IllegalTokenException;
 import cn.kduck.security.mfa.exception.MfaValidationException;
 import cn.kduck.security.mfa.exception.MissingTokenException;
@@ -7,6 +8,7 @@ import cn.kduck.security.handler.LoginFailHandler;
 import cn.kduck.security.handler.LoginSuccessHandler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -22,14 +24,16 @@ public class MfaAuthenticationValidationFilter extends OncePerRequestFilter {
     private final MfaUserDetailsService mfaUserDetailsService;
     private MfaTokenService tokenService;
     private String endpoint;
+    private final RequestMatcher ignoringRequestMatcher;
 
     private LoginSuccessHandler successHandler = new LoginSuccessHandler();
     private LoginFailHandler failureHandler = new LoginFailHandler();
 
-    public MfaAuthenticationValidationFilter(MfaUserDetailsService mfaUserDetailsService,MfaTokenService tokenService, String endpoint, String successUrl, String mfaAuthUrl) {
+    public MfaAuthenticationValidationFilter(MfaUserDetailsService mfaUserDetailsService, MfaTokenService tokenService, String endpoint, String successUrl, String mfaAuthUrl, RequestMatcher ignoringRequestMatcher) {
         this.mfaUserDetailsService = mfaUserDetailsService;
         this.tokenService = tokenService;
         this.endpoint = endpoint;
+        this.ignoringRequestMatcher = ignoringRequestMatcher;
         if(successUrl != null){
             successHandler.setDefaultTargetUrl(successUrl);
         }
@@ -44,6 +48,10 @@ public class MfaAuthenticationValidationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws IOException, ServletException {
 //        HttpServletRequest req = (HttpServletRequest) request;
 //        HttpServletResponse resp = (HttpServletResponse) response;
+        if(ignoringRequestMatcher.matches(request)){
+            filterChain.doFilter(request,response);
+            return;
+        }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 

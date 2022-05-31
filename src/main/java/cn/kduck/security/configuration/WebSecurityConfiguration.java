@@ -25,8 +25,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,12 +69,23 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         if(isSpringClient){
             http.requestMatcher(new OAuthRequestMatcher(new String[]{"/oauth/**","/login"}));
         }
+
+        if(httpSecurityConfigurerList != null && !httpSecurityConfigurerList.isEmpty()){
+            for (HttpSecurityConfigurer securityConfigurer : httpSecurityConfigurerList) {
+                securityConfigurer.configure(http);
+            }
+        }
+
         http.cors().and()//跨域配置生效，必须调用cors()方法
                 .authorizeRequests().accessDecisionManager(new AffirmativeBased(voterList))
-//                .antMatchers("/oauth2/authorization/**").permitAll()
+//                .antMatchers("/**/*.png","/**/*.jpg","/**/*.gif","/**/*.bmp","/**/*.css","/**/*.js","/webjars/**","/favicon.ico", // for images
+//                        "/oauth/token/code","/oauth/token/password","/oauth/token/client",// for OAuth2
+//                        "/**/sc/**","/**/*.nocache.js","/**/*.cache.js",// for smartGWT
+//                        "/actuator/**").permitAll()
+                .requestMatchers(new IgnoringRequestMatcher(securityProperties)).permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin()
-                .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖.failureHandler同理
+                .successHandler(loginSuccessHandler())//配置了successHandler就不要配置defaultSuccessUrl，会被覆盖。failureHandler同理
                 .failureHandler(loginFailHandler())
                 .loginProcessingUrl("/login")
                 .authenticationDetailsSource(authenticationDetailsSource)
@@ -87,11 +103,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             http.exceptionHandling().accessDeniedPage(securityProperties.getAccessDeniedUrl());
         }
 
-        if(httpSecurityConfigurerList != null && !httpSecurityConfigurerList.isEmpty()){
-            for (HttpSecurityConfigurer securityConfigurer : httpSecurityConfigurerList) {
-                securityConfigurer.configure(http);
-            }
-        }
 //              http.authenticationProvider(new AuthenticationProvider());
     }
 
@@ -127,61 +138,51 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         return loginFailHandler;
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .antMatchers("/**/*.png","/**/*.jpg","/**/*.gif","/**/*.bmp")
-                .antMatchers("/**/*.css","/**/*.js")
 
-                .antMatchers("/swagger-ui.html")
-                .antMatchers("/webjars/**")
-                .antMatchers("/v2/**")
-                .antMatchers("/v3/**")
-                .antMatchers("/swagger-resources/**")
-                .antMatchers("/error")
+    public static final class IgnoringRequestMatcher implements RequestMatcher{
 
-                .antMatchers("/favicon.ico")
+        private final RequestMatcher requestMatcher;
 
-                .antMatchers("/oauth/token/code")
-                .antMatchers("/oauth/token/password")
-                .antMatchers("/oauth/token/client")
+        public IgnoringRequestMatcher(KduckSecurityProperties securityProperties){
 
-//                .antMatchers("/actuator/health")
-                .antMatchers("/actuator/**")
-
-                .antMatchers("/proxy/**")
-
-                //for gwt
-                .antMatchers("/**/sc/**")
-                .antMatchers("/**/*.nocache.js")
-                .antMatchers("/**/*.cache.js");
-
-        if(securityProperties.getLoginPage() != null){
-            web.ignoring().antMatchers(securityProperties.getLoginPage());
-        }
-        if(securityProperties.getDefaultFailureUrl() != null){
-            web.ignoring().antMatchers(securityProperties.getDefaultFailureUrl());
-        }
-
-        if(securityProperties.getMfa() != null && securityProperties.getMfa().getMfaPage() != null){
-            web.ignoring().antMatchers(securityProperties.getMfa().getMfaPage());
-        }else{
-            web.ignoring().antMatchers("/mfaPage.html");
-        }
-
-        String[] ignored = securityProperties.getIgnored();
-        if(ignored != null && ignored.length > 0){
-            for (String i : ignored) {
-                web.ignoring().antMatchers(i);
+            List<RequestMatcher> requestMatcherList = new ArrayList<>();
+            if(securityProperties.getLoginPage() != null){
+                requestMatcherList.add(new AntPathRequestMatcher(securityProperties.getLoginPage()));
             }
-        }
-
-        if(httpSecurityConfigurerList != null && !httpSecurityConfigurerList.isEmpty()){
-            for (HttpSecurityConfigurer securityConfigurer : httpSecurityConfigurerList) {
-                securityConfigurer.configure(web);
+            if(securityProperties.getDefaultFailureUrl() != null){
+                requestMatcherList.add(new AntPathRequestMatcher(securityProperties.getDefaultFailureUrl()));
             }
+
+            if(securityProperties.getMfa() != null && securityProperties.getMfa().getMfaPage() != null){
+                requestMatcherList.add(new AntPathRequestMatcher(securityProperties.getMfa().getMfaPage()));
+            }else{
+                requestMatcherList.add(new AntPathRequestMatcher("/mfaPage.html"));
+            }
+
+
+            String[] ignored = securityProperties.getIgnored();
+            if(ignored != null && ignored.length > 0){
+                for (String i : ignored) {
+                    requestMatcherList.add(new AntPathRequestMatcher(i));;
+                }
+            }
+
+            String[] staticResource = new String[]{"/**/*.png","/**/*.jpg","/**/*.gif","/**/*.bmp","/**/*.css","/**/*.js","/webjars/**","/favicon.ico", // for images
+                    "/oauth/token/code","/oauth/token/password","/oauth/token/client",// for OAuth2
+                    "/**/sc/**","/**/*.nocache.js","/**/*.cache.js",// for smartGWT
+                    "/actuator/**"
+            };
+            for (String s : staticResource) {
+                requestMatcherList.add(new AntPathRequestMatcher(s));
+            }
+
+            requestMatcher = new OrRequestMatcher(requestMatcherList.toArray(new RequestMatcher[0]));
         }
 
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            return requestMatcher.matches(request);
+        }
     }
 
     @Bean

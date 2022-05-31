@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * 登录入口，如果当前请求的是/currentUser接口，则会以application/json方式返回失败json，
+ * 否则会使用默认的登录入口处理逻辑，即302跳转到指定的登录页。
  * LiuHG
  */
 public class LoginJsonAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint implements AuthenticationEntryPoint {

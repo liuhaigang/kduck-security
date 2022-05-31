@@ -17,8 +17,6 @@ import java.util.Collection;
 public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
     private AuthenticationTrustResolver authenticationTrustResolver = new AuthenticationTrustResolverImpl();
 
-//    private AntPathMatcher pathMatcher =  new AntPathMatcher();
-
     @Override
     public boolean supports(ConfigAttribute attribute) {
         return true;
@@ -84,8 +82,7 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
 
     private boolean permitAll(Collection<ConfigAttribute> attributes) {
         for (ConfigAttribute attribute : attributes) {
-            String attribute1 = attribute.getAttribute();
-            if(attribute1 != null && attribute1.equals("permitAll")){
+            if(attribute.toString().equals("permitAll")){
                 return true;
             }
         }
@@ -99,7 +96,4 @@ public abstract class AbstractRoleAccessVoter implements RoleAccessVoter {
 
     public abstract boolean checkAuthorize(Authentication authentication,HttpServletRequest request);
 
-//    public abstract List<ProtectedResource> listResourceOperateByCode(Authentication authentication);
-//
-//    public abstract List<ProtectedResource> listAllResourceOperate();
 }

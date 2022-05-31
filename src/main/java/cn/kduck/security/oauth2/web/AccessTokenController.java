@@ -7,9 +7,6 @@ import cn.kduck.security.KduckSecurityProperties.Provider;
 import cn.kduck.security.KduckSecurityProperties.Registration;
 import cn.kduck.security.handler.OAuthTokenSuccessHandler;
 import cn.kduck.core.web.json.JsonObject;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -81,11 +78,11 @@ public class AccessTokenController {
      * @return AccessToken信息
      */
     @PostMapping("/token/password")
-    @ApiOperation("oauth2的password认证类型方式登录")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "userName", value = "姓名", paramType = "query"),
-            @ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
-    })
+//    @ApiOperation("oauth2的password认证类型方式登录")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "userName", value = "姓名", paramType = "query"),
+//            @ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
+//    })
     public JsonObject login(String userName, String password, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         Registration registration = getRegistration();
@@ -116,7 +113,7 @@ public class AccessTokenController {
      * @return AccessToken信息
      */
     @PostMapping("/token/client")
-    @ApiOperation("oauth2的client认证类型方式登录")
+//    @ApiOperation("oauth2的client认证类型方式登录")
     public JsonObject login(){
         Registration registration = getRegistration();
         Provider provider = getProvider();
