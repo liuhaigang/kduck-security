@@ -34,13 +34,13 @@ K-Duck安全模块需要单独引入pom依赖：
    <dependency>
      <groupId>cn.kduck</groupId>
      <artifactId>kduck-core</artifactId>
-     <version>1.1.0</version>
+     <version>1.1.4</version>
    </dependency>
 
    <dependency>
       <groupId>cn.kduck</groupId>
       <artifactId>kduck-security</artifactId>
-      <version>1.1.0</version>
+      <version>1.1.2</version>
    </dependency>
 </dependencies>
 ```
